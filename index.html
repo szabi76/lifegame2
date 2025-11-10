@@ -121,18 +121,32 @@
                                 <input type="checkbox" id="enableSuperbreed">
                                 <span>⭐ Super</span>
                             </label>
+                        </div>
+                        <div class="checkbox-row">
                             <label class="checkbox-compact">
                                 <input type="checkbox" id="enableCatastrophe">
                                 <span>💥 Chaos</span>
+                            </label>
+                            <label class="checkbox-compact">
+                                <input type="checkbox" id="enableCleaner">
+                                <span>✨ Cleaner</span>
                             </label>
                         </div>
                         <div class="button-group-inline">
                             <button id="triggerPlague" class="btn-compact btn-plague">Infect</button>
                             <button id="triggerSuperbreed" class="btn-compact btn-super">Enhance</button>
                         </div>
+                        <div class="button-group-inline">
+                            <button id="triggerCleaner" class="btn-compact btn-cleaner">Deploy</button>
+                            <button id="triggerChaos" class="btn-compact btn-chaos">Destroy</button>
+                        </div>
                         <div class="slider-group">
                             <label>Plague <span id="plagueRateValue">15</span>%</label>
                             <input type="range" id="plagueRate" min="5" max="50" value="15" class="slider-compact">
+                        </div>
+                        <div class="slider-group">
+                            <label>Cleaner <span id="cleanerRateValue">20</span>%</label>
+                            <input type="range" id="cleanerRate" min="5" max="50" value="20" class="slider-compact">
                         </div>
                         <div class="slider-group">
                             <label>Disaster <span id="catastropheChanceValue">1</span>%</label>
@@ -141,6 +155,7 @@
                         <div class="stats-advanced">
                             <div class="stat-adv">🦠 <span id="plaguedCells">0</span></div>
                             <div class="stat-adv">⭐ <span id="superbreedCells">0</span></div>
+                            <div class="stat-adv">✨ <span id="cleanerCells">0</span></div>
                             <div class="stat-adv">💥 <span id="catastropheCount">0</span></div>
                         </div>
                     </div>

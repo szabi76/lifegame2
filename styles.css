@@ -445,6 +445,16 @@ body {
     color: white;
 }
 
+.btn-cleaner {
+    background: linear-gradient(135deg, #48dbfb, #0abde3);
+    color: white;
+}
+
+.btn-chaos {
+    background: linear-gradient(135deg, #ff6348, #ff4757);
+    color: white;
+}
+
 .btn-compact:hover {
     transform: translateY(-1px);
     filter: brightness(1.1);
