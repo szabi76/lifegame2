@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Game of Life</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1 class="title">
+                <span class="title-icon">⚡</span>
+                Advanced Game of Life
+                <span class="title-icon">⚡</span>
+            </h1>
+            <p class="subtitle">Experience Conway's Game of Life with modern enhancements</p>
+        </header>
+
+        <div class="main-content">
+            <div class="controls-panel">
+                <div class="control-section">
+                    <h3>Simulation</h3>
+                    <div class="button-group">
+                        <button id="playPause" class="btn btn-primary">▶ Play</button>
+                        <button id="step" class="btn btn-secondary">⏭ Step</button>
+                        <button id="clear" class="btn btn-danger">🗑 Clear</button>
+                        <button id="random" class="btn btn-success">🎲 Random</button>
+                    </div>
+                </div>
+
+                <div class="control-section">
+                    <h3>Speed Control</h3>
+                    <div class="slider-container">
+                        <label for="speed">FPS: <span id="speedValue">10</span></label>
+                        <input type="range" id="speed" min="1" max="60" value="10" class="slider">
+                    </div>
+                </div>
+
+                <div class="control-section">
+                    <h3>Grid Size</h3>
+                    <div class="slider-container">
+                        <label for="cellSize">Cell Size: <span id="cellSizeValue">8</span>px</label>
+                        <input type="range" id="cellSize" min="4" max="20" value="8" class="slider">
+                    </div>
+                </div>
+
+                <div class="control-section">
+                    <h3>Themes</h3>
+                    <div class="button-group theme-buttons">
+                        <button class="btn btn-theme active" data-theme="neon">🌈 Neon</button>
+                        <button class="btn btn-theme" data-theme="ocean">🌊 Ocean</button>
+                        <button class="btn btn-theme" data-theme="sunset">🌅 Sunset</button>
+                        <button class="btn btn-theme" data-theme="matrix">💚 Matrix</button>
+                        <button class="btn btn-theme" data-theme="fire">🔥 Fire</button>
+                    </div>
+                </div>
+
+                <div class="control-section">
+                    <h3>Preset Patterns</h3>
+                    <div class="button-group pattern-buttons">
+                        <button class="btn btn-pattern" data-pattern="glider">Glider</button>
+                        <button class="btn btn-pattern" data-pattern="pulsar">Pulsar</button>
+                        <button class="btn btn-pattern" data-pattern="lwss">LWSS</button>
+                        <button class="btn btn-pattern" data-pattern="gosperGun">Gosper Gun</button>
+                        <button class="btn btn-pattern" data-pattern="pentadecathlon">Pentadecathlon</button>
+                        <button class="btn btn-pattern" data-pattern="acorn">Acorn</button>
+                    </div>
+                </div>
+
+                <div class="control-section">
+                    <h3>Features</h3>
+                    <div class="checkbox-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="showAging" checked>
+                            <span>Show Cell Aging</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="showGrid" checked>
+                            <span>Show Grid Lines</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="wrapEdges" checked>
+                            <span>Wrap Edges</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="stats">
+                    <h3>Statistics</h3>
+                    <div class="stat-item">
+                        <span>Generation:</span>
+                        <span id="generation">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span>Population:</span>
+                        <span id="population">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span>FPS:</span>
+                        <span id="actualFps">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="canvas-container">
+                <canvas id="gameCanvas"></canvas>
+                <div class="canvas-instructions">
+                    <p>🖱 Click or drag to draw cells</p>
+                    <p>🎨 Watch cells age with beautiful color transitions</p>
+                </div>
+            </div>
+        </div>
+
+        <footer class="footer">
+            <p>Conway's Game of Life • Enhanced Edition</p>
+        </footer>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+</html>
