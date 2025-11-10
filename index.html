@@ -7,157 +7,154 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="container">
-        <header class="header">
-            <h1 class="title">
-                <span class="title-icon">⚡</span>
-                Advanced Game of Life
-                <span class="title-icon">⚡</span>
-            </h1>
-            <p class="subtitle">Experience Conway's Game of Life with modern enhancements</p>
-        </header>
-
-        <div class="main-content">
-            <div class="controls-panel">
-                <div class="control-section">
-                    <h3>Simulation</h3>
-                    <div class="button-group">
-                        <button id="playPause" class="btn btn-primary">▶ Play</button>
-                        <button id="step" class="btn btn-secondary">⏭ Step</button>
-                        <button id="clear" class="btn btn-danger">🗑 Clear</button>
-                        <button id="random" class="btn btn-success">🎲 Random</button>
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h1 class="sidebar-title">Game of Life</h1>
+                <div class="stats-compact">
+                    <div class="stat-compact">
+                        <span class="stat-label">Gen</span>
+                        <span id="generation" class="stat-value">0</span>
                     </div>
-                </div>
-
-                <div class="control-section">
-                    <h3>Speed Control</h3>
-                    <div class="slider-container">
-                        <label for="speed">FPS: <span id="speedValue">10</span></label>
-                        <input type="range" id="speed" min="1" max="60" value="10" class="slider">
+                    <div class="stat-compact">
+                        <span class="stat-label">Pop</span>
+                        <span id="population" class="stat-value">0</span>
                     </div>
-                </div>
-
-                <div class="control-section">
-                    <h3>Grid Size</h3>
-                    <div class="slider-container">
-                        <label for="cellSize">Cell Size: <span id="cellSizeValue">8</span>px</label>
-                        <input type="range" id="cellSize" min="4" max="20" value="8" class="slider">
-                    </div>
-                </div>
-
-                <div class="control-section">
-                    <h3>Themes</h3>
-                    <div class="button-group theme-buttons">
-                        <button class="btn btn-theme active" data-theme="neon">🌈 Neon</button>
-                        <button class="btn btn-theme" data-theme="ocean">🌊 Ocean</button>
-                        <button class="btn btn-theme" data-theme="sunset">🌅 Sunset</button>
-                        <button class="btn btn-theme" data-theme="matrix">💚 Matrix</button>
-                        <button class="btn btn-theme" data-theme="fire">🔥 Fire</button>
-                    </div>
-                </div>
-
-                <div class="control-section">
-                    <h3>Preset Patterns</h3>
-                    <div class="button-group pattern-buttons">
-                        <button class="btn btn-pattern" data-pattern="glider">Glider</button>
-                        <button class="btn btn-pattern" data-pattern="pulsar">Pulsar</button>
-                        <button class="btn btn-pattern" data-pattern="lwss">LWSS</button>
-                        <button class="btn btn-pattern" data-pattern="gosperGun">Gosper Gun</button>
-                        <button class="btn btn-pattern" data-pattern="pentadecathlon">Pentadecathlon</button>
-                        <button class="btn btn-pattern" data-pattern="acorn">Acorn</button>
-                    </div>
-                </div>
-
-                <div class="control-section">
-                    <h3>Features</h3>
-                    <div class="checkbox-group">
-                        <label class="checkbox-label">
-                            <input type="checkbox" id="showAging" checked>
-                            <span>Show Cell Aging</span>
-                        </label>
-                        <label class="checkbox-label">
-                            <input type="checkbox" id="showGrid" checked>
-                            <span>Show Grid Lines</span>
-                        </label>
-                        <label class="checkbox-label">
-                            <input type="checkbox" id="wrapEdges" checked>
-                            <span>Wrap Edges</span>
-                        </label>
-                    </div>
-                </div>
-
-                <div class="control-section advanced-features">
-                    <h3>⚠️ Advanced Features</h3>
-                    <div class="checkbox-group">
-                        <label class="checkbox-label">
-                            <input type="checkbox" id="enablePlague">
-                            <span>🦠 Plague Mode</span>
-                        </label>
-                        <label class="checkbox-label">
-                            <input type="checkbox" id="enableSuperbreed">
-                            <span>⭐ Superbreed Mode</span>
-                        </label>
-                        <label class="checkbox-label">
-                            <input type="checkbox" id="enableCatastrophe">
-                            <span>💥 Random Catastrophes</span>
-                        </label>
-                    </div>
-                    <div class="button-group" style="margin-top: 15px;">
-                        <button id="triggerPlague" class="btn btn-warning">🦠 Infect</button>
-                        <button id="triggerSuperbreed" class="btn btn-special">⭐ Enhance</button>
-                    </div>
-                    <div class="slider-container" style="margin-top: 15px;">
-                        <label for="plagueRate">Plague Spread: <span id="plagueRateValue">15</span>%</label>
-                        <input type="range" id="plagueRate" min="5" max="50" value="15" class="slider">
-                    </div>
-                    <div class="slider-container">
-                        <label for="catastropheChance">Catastrophe Rate: <span id="catastropheChanceValue">1</span>%</label>
-                        <input type="range" id="catastropheChance" min="1" max="10" value="1" class="slider">
-                    </div>
-                </div>
-
-                <div class="stats">
-                    <h3>Statistics</h3>
-                    <div class="stat-item">
-                        <span>Generation:</span>
-                        <span id="generation">0</span>
-                    </div>
-                    <div class="stat-item">
-                        <span>Population:</span>
-                        <span id="population">0</span>
-                    </div>
-                    <div class="stat-item">
-                        <span>🦠 Plagued:</span>
-                        <span id="plaguedCells" class="stat-plague">0</span>
-                    </div>
-                    <div class="stat-item">
-                        <span>⭐ Superbreed:</span>
-                        <span id="superbreedCells" class="stat-superbreed">0</span>
-                    </div>
-                    <div class="stat-item">
-                        <span>💥 Catastrophes:</span>
-                        <span id="catastropheCount" class="stat-catastrophe">0</span>
-                    </div>
-                    <div class="stat-item">
-                        <span>FPS:</span>
-                        <span id="actualFps">0</span>
+                    <div class="stat-compact">
+                        <span class="stat-label">FPS</span>
+                        <span id="actualFps" class="stat-value">0</span>
                     </div>
                 </div>
             </div>
 
-            <div class="canvas-container">
-                <canvas id="gameCanvas"></canvas>
-                <div class="canvas-instructions">
-                    <p>🖱 Click or drag to draw cells</p>
-                    <p>🎨 Watch cells age with beautiful color transitions</p>
-                    <p>🦠 Red = Plague | ⭐ Gold = Superbreed | 💙 Blue = Normal</p>
+            <div class="controls-wrapper">
+                <!-- Simulation Controls -->
+                <div class="control-group">
+                    <div class="button-group-compact">
+                        <button id="playPause" class="btn btn-primary btn-icon">▶</button>
+                        <button id="step" class="btn btn-secondary btn-icon">⏭</button>
+                        <button id="random" class="btn btn-success btn-icon">🎲</button>
+                        <button id="clear" class="btn btn-danger btn-icon">🗑</button>
+                    </div>
+                </div>
+
+                <!-- Speed & Grid -->
+                <div class="control-group">
+                    <button class="section-toggle active" data-section="speed-grid">
+                        <span>⚙️ Settings</span>
+                        <span class="toggle-icon">▼</span>
+                    </button>
+                    <div id="speed-grid" class="section-content active">
+                        <div class="slider-group">
+                            <label>Speed <span id="speedValue">10</span></label>
+                            <input type="range" id="speed" min="1" max="60" value="10" class="slider-compact">
+                        </div>
+                        <div class="slider-group">
+                            <label>Cell Size <span id="cellSizeValue">8</span></label>
+                            <input type="range" id="cellSize" min="4" max="20" value="8" class="slider-compact">
+                        </div>
+                        <div class="checkbox-row">
+                            <label class="checkbox-compact">
+                                <input type="checkbox" id="showAging" checked>
+                                <span>Aging</span>
+                            </label>
+                            <label class="checkbox-compact">
+                                <input type="checkbox" id="showGrid" checked>
+                                <span>Grid</span>
+                            </label>
+                            <label class="checkbox-compact">
+                                <input type="checkbox" id="wrapEdges" checked>
+                                <span>Wrap</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Themes -->
+                <div class="control-group">
+                    <button class="section-toggle" data-section="themes">
+                        <span>🎨 Themes</span>
+                        <span class="toggle-icon">▼</span>
+                    </button>
+                    <div id="themes" class="section-content">
+                        <div class="theme-grid">
+                            <button class="btn-theme-compact active" data-theme="neon">Neon</button>
+                            <button class="btn-theme-compact" data-theme="ocean">Ocean</button>
+                            <button class="btn-theme-compact" data-theme="sunset">Sunset</button>
+                            <button class="btn-theme-compact" data-theme="matrix">Matrix</button>
+                            <button class="btn-theme-compact" data-theme="fire">Fire</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Patterns -->
+                <div class="control-group">
+                    <button class="section-toggle" data-section="patterns">
+                        <span>📐 Patterns</span>
+                        <span class="toggle-icon">▼</span>
+                    </button>
+                    <div id="patterns" class="section-content">
+                        <div class="pattern-grid">
+                            <button class="btn-pattern-compact" data-pattern="glider">Glider</button>
+                            <button class="btn-pattern-compact" data-pattern="pulsar">Pulsar</button>
+                            <button class="btn-pattern-compact" data-pattern="lwss">LWSS</button>
+                            <button class="btn-pattern-compact" data-pattern="gosperGun">Gun</button>
+                            <button class="btn-pattern-compact" data-pattern="pentadecathlon">Penta</button>
+                            <button class="btn-pattern-compact" data-pattern="acorn">Acorn</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Advanced Features -->
+                <div class="control-group">
+                    <button class="section-toggle advanced-toggle" data-section="advanced">
+                        <span>⚠️ Advanced</span>
+                        <span class="toggle-icon">▼</span>
+                    </button>
+                    <div id="advanced" class="section-content">
+                        <div class="checkbox-row">
+                            <label class="checkbox-compact">
+                                <input type="checkbox" id="enablePlague">
+                                <span>🦠 Plague</span>
+                            </label>
+                            <label class="checkbox-compact">
+                                <input type="checkbox" id="enableSuperbreed">
+                                <span>⭐ Super</span>
+                            </label>
+                            <label class="checkbox-compact">
+                                <input type="checkbox" id="enableCatastrophe">
+                                <span>💥 Chaos</span>
+                            </label>
+                        </div>
+                        <div class="button-group-inline">
+                            <button id="triggerPlague" class="btn-compact btn-plague">Infect</button>
+                            <button id="triggerSuperbreed" class="btn-compact btn-super">Enhance</button>
+                        </div>
+                        <div class="slider-group">
+                            <label>Plague <span id="plagueRateValue">15</span>%</label>
+                            <input type="range" id="plagueRate" min="5" max="50" value="15" class="slider-compact">
+                        </div>
+                        <div class="slider-group">
+                            <label>Disaster <span id="catastropheChanceValue">1</span>%</label>
+                            <input type="range" id="catastropheChance" min="1" max="10" value="1" class="slider-compact">
+                        </div>
+                        <div class="stats-advanced">
+                            <div class="stat-adv">🦠 <span id="plaguedCells">0</span></div>
+                            <div class="stat-adv">⭐ <span id="superbreedCells">0</span></div>
+                            <div class="stat-adv">💥 <span id="catastropheCount">0</span></div>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <footer class="footer">
-            <p>Conway's Game of Life • Enhanced Edition</p>
-        </footer>
+            <div class="sidebar-footer">
+                <div class="hint">🖱 Click/drag to draw</div>
+            </div>
+        </aside>
+
+        <main class="canvas-main">
+            <canvas id="gameCanvas"></canvas>
+        </main>
     </div>
 
     <script src="game.js"></script>

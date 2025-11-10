@@ -51,9 +51,10 @@ class GameOfLife {
     }
 
     init() {
-        // Set canvas size
-        const maxWidth = window.innerWidth > 1200 ? 1200 : window.innerWidth - 400;
-        const maxHeight = window.innerHeight - 300;
+        // Set canvas size based on viewport and sidebar
+        const sidebarWidth = 280;
+        const maxWidth = window.innerWidth - sidebarWidth - 40;
+        const maxHeight = window.innerHeight - 40;
 
         this.canvas.width = maxWidth;
         this.canvas.height = maxHeight;
@@ -168,10 +169,27 @@ class GameOfLife {
             document.getElementById('catastropheChanceValue').textContent = e.target.value;
         });
 
+        // Collapsible sections
+        document.querySelectorAll('.section-toggle').forEach(toggle => {
+            toggle.addEventListener('click', () => {
+                const section = toggle.dataset.section;
+                const content = document.getElementById(section);
+                const isActive = toggle.classList.contains('active');
+
+                if (isActive) {
+                    toggle.classList.remove('active');
+                    content.classList.remove('active');
+                } else {
+                    toggle.classList.add('active');
+                    content.classList.add('active');
+                }
+            });
+        });
+
         // Theme buttons
-        document.querySelectorAll('.btn-theme').forEach(btn => {
+        document.querySelectorAll('.btn-theme-compact').forEach(btn => {
             btn.addEventListener('click', (e) => {
-                document.querySelectorAll('.btn-theme').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.btn-theme-compact').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
                 const theme = btn.dataset.theme;
                 this.setTheme(theme);
@@ -179,7 +197,7 @@ class GameOfLife {
         });
 
         // Pattern buttons
-        document.querySelectorAll('.btn-pattern').forEach(btn => {
+        document.querySelectorAll('.btn-pattern-compact').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const pattern = btn.dataset.pattern;
                 this.loadPattern(pattern);
