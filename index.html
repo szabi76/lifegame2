@@ -171,111 +171,9 @@
                     </div>
                 </div>
 
-                <!-- Info/Help Menu -->
+                <!-- Help Button -->
                 <div class="control-group">
-                    <button class="section-toggle" data-section="info">
-                        <span>ℹ️ Game Logic</span>
-                        <span class="toggle-icon">▼</span>
-                    </button>
-                    <div id="info" class="section-content">
-                        <div class="info-section">
-                            <h4>🎮 Basic Rules</h4>
-                            <p>Conway's Game of Life: cells live or die based on neighbors.</p>
-                            <ul>
-                                <li><strong>Birth:</strong> Dead cell with 3 neighbors becomes alive</li>
-                                <li><strong>Survival:</strong> Live cell with 2-3 neighbors survives</li>
-                                <li><strong>Death:</strong> Otherwise, cell dies</li>
-                            </ul>
-                        </div>
-
-                        <div class="info-section">
-                            <h4>🦠 Plague Cells (Red Circles)</h4>
-                            <p>Infectious disease that spreads and kills.</p>
-                            <ul>
-                                <li>Consume 2x resources (0.02 vs 0.01)</li>
-                                <li>Spread to neighbors (25% chance)</li>
-                                <li>Die after age 5 (40% chance)</li>
-                                <li>Born in chaos zones automatically</li>
-                            </ul>
-                        </div>
-
-                        <div class="info-section">
-                            <h4>⭐ Superbreed Cells (Gold Diamonds)</h4>
-                            <p>Enhanced survival and reproduction.</p>
-                            <ul>
-                                <li>Survive with 1-4 neighbors (vs 2-3)</li>
-                                <li>Can birth with only 2 neighbors</li>
-                                <li>30% chance to pass trait to offspring</li>
-                            </ul>
-                        </div>
-
-                        <div class="info-section">
-                            <h4>✨ Cleaner Cells (Cyan Pulsating)</h4>
-                            <p>Restore order and remove specialties.</p>
-                            <ul>
-                                <li>Convert neighbors to normal cells</li>
-                                <li>Emit sparkle particles (5% chance)</li>
-                                <li>30% chance to spread to offspring</li>
-                                <li>Remove plague/superbreed/mutation</li>
-                            </ul>
-                        </div>
-
-                        <div class="info-section">
-                            <h4>🧬 Mutated Cells (Purple Hexagons)</h4>
-                            <p>Hybrid cells with enhanced abilities.</p>
-                            <ul>
-                                <li>Random mutation (5% default rate)</li>
-                                <li>Survive with 1-4 neighbors</li>
-                                <li>Keep original specialty (plague/super)</li>
-                                <li>Cleaner cells remove mutations</li>
-                            </ul>
-                        </div>
-
-                        <div class="info-section">
-                            <h4>⚡ Resource System</h4>
-                            <p>Energy limits growth and survival.</p>
-                            <ul>
-                                <li>Each cell starts at 100% resources</li>
-                                <li>Living cells consume per generation</li>
-                                <li>Resources regenerate slowly (0.5%/gen)</li>
-                                <li>Low resources (<30%) = 30% death penalty</li>
-                                <li>Birth requires >20% resources</li>
-                            </ul>
-                        </div>
-
-                        <div class="info-section">
-                            <h4>💥 Catastrophe System</h4>
-                            <p>Disasters create infection zones.</p>
-                            <ul>
-                                <li>Random radius 10-20 cells</li>
-                                <li>Kills all cells in impact zone</li>
-                                <li>Creates chaos marker (neon glow)</li>
-                                <li>Cells born in chaos = auto-plagued</li>
-                                <li>Chaos decays slowly (0.5/gen)</li>
-                                <li>30 explosion particles</li>
-                            </ul>
-                        </div>
-
-                        <div class="info-section">
-                            <h4>🎨 Cell Shapes</h4>
-                            <ul>
-                                <li>⬜ <strong>Square:</strong> Normal cells</li>
-                                <li>⭕ <strong>Circle:</strong> Plague cells</li>
-                                <li>◆ <strong>Diamond:</strong> Superbreed cells</li>
-                                <li>⬡ <strong>Hexagon:</strong> Mutated cells</li>
-                                <li>◉ <strong>Pulsating Circle:</strong> Cleaner cells</li>
-                            </ul>
-                        </div>
-
-                        <div class="info-section">
-                            <h4>✨ Particle Effects</h4>
-                            <ul>
-                                <li><strong>Explosion:</strong> Colorful bursts from catastrophes</li>
-                                <li><strong>Sparkle:</strong> Cyan twinkles from cleaners</li>
-                                <li><strong>Death:</strong> Gray fade from destroyed cells</li>
-                            </ul>
-                        </div>
-                    </div>
+                    <button id="openHelp" class="btn btn-help">📖 Game Guide</button>
                 </div>
             </div>
 
@@ -287,6 +185,163 @@
         <main class="canvas-main">
             <canvas id="gameCanvas"></canvas>
         </main>
+    </div>
+
+    <!-- Book-style Modal -->
+    <div id="helpModal" class="modal">
+        <div class="modal-overlay"></div>
+        <div class="book-container">
+            <button class="book-close">✕</button>
+            <div class="book">
+                <div class="book-page active" data-page="1">
+                    <h2>📖 Advanced Game of Life</h2>
+                    <h3>Complete Game Guide</h3>
+
+                    <div class="page-content">
+                        <h4>🎮 Conway's Basic Rules</h4>
+                        <p>The foundation of cellular automata:</p>
+                        <ul>
+                            <li><strong>Birth:</strong> A dead cell with exactly 3 neighbors becomes alive</li>
+                            <li><strong>Survival:</strong> A live cell with 2-3 neighbors survives</li>
+                            <li><strong>Death:</strong> All other cells die from loneliness or overcrowding</li>
+                        </ul>
+
+                        <h4>🖱 Basic Controls</h4>
+                        <ul>
+                            <li><strong>Click/Drag:</strong> Draw cells on the canvas</li>
+                            <li><strong>▶ Play:</strong> Start/pause the simulation</li>
+                            <li><strong>⏭ Step:</strong> Advance one generation</li>
+                            <li><strong>🎲 Random:</strong> Fill with random cells</li>
+                            <li><strong>🗑 Clear:</strong> Remove all cells</li>
+                        </ul>
+                    </div>
+                    <div class="page-footer">Page 1 of 4</div>
+                </div>
+
+                <div class="book-page" data-page="2">
+                    <h2>🧬 Cell Types & Mechanics</h2>
+
+                    <div class="page-content">
+                        <h4>🦠 Plague Cells (Red Circles)</h4>
+                        <p>Infectious disease that spreads through the population.</p>
+                        <ul>
+                            <li>Consume 2× resources (0.02 vs 0.01 per generation)</li>
+                            <li>Spread to neighbors with 25% infection chance</li>
+                            <li>Die after age 5 with 40% mortality chance</li>
+                            <li>Automatically infect cells born in chaos zones</li>
+                            <li><strong>Trigger:</strong> Click 🦠 Infect button (affects 25% of living cells)</li>
+                        </ul>
+
+                        <h4>⭐ Superbreed Cells (Gold Diamonds)</h4>
+                        <p>Enhanced survival and reproduction abilities.</p>
+                        <ul>
+                            <li>Survive with 1-4 neighbors (instead of 2-3)</li>
+                            <li>Can birth new cells with only 2 neighbors</li>
+                            <li>30% chance to pass trait to offspring</li>
+                            <li><strong>Trigger:</strong> Click ⭐ Enhance button (affects 20% of living cells)</li>
+                        </ul>
+
+                        <h4>✨ Cleaner Cells (Cyan Pulsating)</h4>
+                        <p>Restore order by removing special properties.</p>
+                        <ul>
+                            <li>Convert neighbors back to normal cells</li>
+                            <li>Emit sparkle particles (5% chance per generation)</li>
+                            <li>30% chance to spread cleaner trait to offspring</li>
+                            <li>Remove plague, superbreed, and mutation effects</li>
+                            <li><strong>Trigger:</strong> Click ✨ Deploy button (affects 15% of living cells)</li>
+                        </ul>
+                    </div>
+                    <div class="page-footer">Page 2 of 4</div>
+                </div>
+
+                <div class="book-page" data-page="3">
+                    <h2>⚡ Advanced Systems</h2>
+
+                    <div class="page-content">
+                        <h4>🧬 Mutation System</h4>
+                        <p>Random evolution creates hybrid super-cells.</p>
+                        <ul>
+                            <li>5% default mutation rate (adjustable 0-20%)</li>
+                            <li>Mutated cells are purple hexagons</li>
+                            <li>Gain superbreed survival (1-4 neighbors)</li>
+                            <li>Keep original specialty (plague/superbreed)</li>
+                            <li>Can be removed by cleaner cells</li>
+                        </ul>
+
+                        <h4>⚡ Resource/Energy System</h4>
+                        <p>Environmental constraints limit growth.</p>
+                        <ul>
+                            <li>Each cell location starts at 100% resources</li>
+                            <li>Living cells consume energy per generation</li>
+                            <li>Resources regenerate slowly at 0.5% per generation</li>
+                            <li>Low resources (&lt;30%) = 30% increased death chance</li>
+                            <li>Birth requires &gt;20% resources available</li>
+                            <li><strong>Monitor:</strong> ⚡ indicator shows average resources</li>
+                        </ul>
+
+                        <h4>💥 Catastrophe System</h4>
+                        <p>Disasters create infection zones with lasting effects.</p>
+                        <ul>
+                            <li>Random impact radius of 10-20 cells</li>
+                            <li>Kills all cells in blast zone instantly</li>
+                            <li>Creates pulsating neon chaos marker</li>
+                            <li>Cells born in chaos zones are auto-plagued</li>
+                            <li>Chaos intensity decays at 0.5 per generation</li>
+                            <li>Spawns 30 colorful explosion particles</li>
+                            <li><strong>Trigger:</strong> Click 💥 Destroy button</li>
+                        </ul>
+                    </div>
+                    <div class="page-footer">Page 3 of 4</div>
+                </div>
+
+                <div class="book-page" data-page="4">
+                    <h2>🎨 Visual Guide & Effects</h2>
+
+                    <div class="page-content">
+                        <h4>Cell Shape Reference</h4>
+                        <ul>
+                            <li>⬜ <strong>Square:</strong> Normal healthy cells</li>
+                            <li>⭕ <strong>Circle:</strong> Plague-infected cells</li>
+                            <li>◆ <strong>Diamond:</strong> Superbreed enhanced cells</li>
+                            <li>⬡ <strong>Hexagon:</strong> Mutated hybrid cells</li>
+                            <li>◉ <strong>Pulsating Circle:</strong> Cleaner cells</li>
+                        </ul>
+
+                        <h4>✨ Particle Effects</h4>
+                        <ul>
+                            <li><strong>Explosion:</strong> Colorful bursts (magenta, pink, red, orange) from catastrophes</li>
+                            <li><strong>Sparkle:</strong> Cyan twinkles from cleaner cells</li>
+                            <li><strong>Death:</strong> Gray particles from destroyed cells</li>
+                        </ul>
+
+                        <h4>📊 Visualization Tools</h4>
+                        <ul>
+                            <li><strong>Timeline Graph:</strong> Tracks population history for all cell types (100 generations)</li>
+                            <li><strong>Bar Chart:</strong> Real-time pulsating bars showing current cell type distribution</li>
+                            <li><strong>Statistics:</strong> Generation count, population, and cell type breakdowns</li>
+                        </ul>
+
+                        <h4>🎨 Color Themes</h4>
+                        <p>Choose from 5 themes: Neon (default), Ocean, Sunset, Matrix, Fire</p>
+
+                        <h4>📐 Preset Patterns</h4>
+                        <p>Classic patterns: Glider, Pulsar, LWSS, Gosper Gun, Pentadecathlon, Acorn</p>
+                    </div>
+                    <div class="page-footer">Page 4 of 4</div>
+                </div>
+
+                <div class="book-nav">
+                    <button class="nav-prev">◀ Previous</button>
+                    <span class="nav-indicator">
+                        <span class="dot active"></span>
+                        <span class="dot"></span>
+                        <span class="dot"></span>
+                        <span class="dot"></span>
+                    </span>
+                    <button class="nav-next">Next ▶</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script src="game.js"></script>

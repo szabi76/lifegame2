@@ -1384,4 +1384,86 @@ class GameOfLife {
 // Initialize game when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
     const game = new GameOfLife();
+
+    // Book Modal Navigation
+    const modal = document.getElementById('helpModal');
+    const openBtn = document.getElementById('openHelp');
+    const closeBtn = document.querySelector('.book-close');
+    const overlay = document.querySelector('.modal-overlay');
+    const prevBtn = document.querySelector('.nav-prev');
+    const nextBtn = document.querySelector('.nav-next');
+    const pages = document.querySelectorAll('.book-page');
+    const dots = document.querySelectorAll('.dot');
+
+    let currentPage = 1;
+    const totalPages = pages.length;
+
+    function showPage(pageNum) {
+        // Hide all pages
+        pages.forEach(page => page.classList.remove('active'));
+        dots.forEach(dot => dot.classList.remove('active'));
+
+        // Show current page
+        const currentPageEl = document.querySelector(`.book-page[data-page="${pageNum}"]`);
+        if (currentPageEl) {
+            currentPageEl.classList.add('active');
+        }
+
+        // Update dots
+        if (dots[pageNum - 1]) {
+            dots[pageNum - 1].classList.add('active');
+        }
+
+        // Update button states
+        prevBtn.disabled = pageNum === 1;
+        nextBtn.disabled = pageNum === totalPages;
+
+        currentPage = pageNum;
+    }
+
+    function openModal() {
+        modal.classList.add('active');
+        showPage(1);
+    }
+
+    function closeModal() {
+        modal.classList.remove('active');
+    }
+
+    // Event listeners
+    openBtn.addEventListener('click', openModal);
+    closeBtn.addEventListener('click', closeModal);
+    overlay.addEventListener('click', closeModal);
+
+    prevBtn.addEventListener('click', () => {
+        if (currentPage > 1) {
+            showPage(currentPage - 1);
+        }
+    });
+
+    nextBtn.addEventListener('click', () => {
+        if (currentPage < totalPages) {
+            showPage(currentPage + 1);
+        }
+    });
+
+    // Keyboard navigation
+    document.addEventListener('keydown', (e) => {
+        if (!modal.classList.contains('active')) return;
+
+        if (e.key === 'Escape') {
+            closeModal();
+        } else if (e.key === 'ArrowLeft' && currentPage > 1) {
+            showPage(currentPage - 1);
+        } else if (e.key === 'ArrowRight' && currentPage < totalPages) {
+            showPage(currentPage + 1);
+        }
+    });
+
+    // Click on dots to navigate
+    dots.forEach((dot, index) => {
+        dot.addEventListener('click', () => {
+            showPage(index + 1);
+        });
+    });
 });
