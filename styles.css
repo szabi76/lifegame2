@@ -482,12 +482,64 @@ body {
 }
 
 /* Population Graph */
-#populationGraph {
+#populationGraph, #barChart {
     width: 100%;
-    height: 120px;
+    height: 140px;
     background: rgba(0, 0, 0, 0.3);
     border-radius: 6px;
     display: block;
+}
+
+/* Info Sections */
+.info-section {
+    margin-bottom: 15px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.info-section:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+.info-section h4 {
+    font-size: 0.9em;
+    margin-bottom: 6px;
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+.info-section p {
+    font-size: 0.8em;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+.info-section ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.info-section li {
+    font-size: 0.75em;
+    color: var(--text-secondary);
+    padding: 3px 0;
+    padding-left: 12px;
+    position: relative;
+    line-height: 1.5;
+}
+
+.info-section li:before {
+    content: "•";
+    position: absolute;
+    left: 0;
+    color: var(--primary-color);
+}
+
+.info-section li strong {
+    color: var(--text-primary);
 }
 
 /* Sidebar Footer */

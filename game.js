@@ -58,9 +58,11 @@ class GameOfLife {
         this.canvas = document.getElementById('gameCanvas');
         this.ctx = this.canvas.getContext('2d');
 
-        // Graph canvas
+        // Graph canvases
         this.graphCanvas = document.getElementById('populationGraph');
         this.graphCtx = this.graphCanvas ? this.graphCanvas.getContext('2d') : null;
+        this.barCanvas = document.getElementById('barChart');
+        this.barCtx = this.barCanvas ? this.barCanvas.getContext('2d') : null;
 
         // Game state
         this.cellSize = 8;
@@ -98,7 +100,14 @@ class GameOfLife {
         this.mutationRate = 0.05; // 5% mutation chance
 
         // Population history for graph (store last 100 generations)
-        this.populationHistory = [];
+        this.populationHistory = {
+            total: [],
+            normal: [],
+            plague: [],
+            superbreed: [],
+            cleaner: [],
+            mutated: []
+        };
         this.maxHistoryLength = 100;
 
         // Interaction
@@ -394,7 +403,14 @@ class GameOfLife {
         this.generation = 0;
         this.catastropheCount = 0;
         this.particles = [];
-        this.populationHistory = [];
+        this.populationHistory = {
+            total: [],
+            normal: [],
+            plague: [],
+            superbreed: [],
+            cleaner: [],
+            mutated: []
+        };
         this.draw();
         this.updateStats();
     }
@@ -414,7 +430,14 @@ class GameOfLife {
         this.generation = 0;
         this.catastropheCount = 0;
         this.particles = [];
-        this.populationHistory = [];
+        this.populationHistory = {
+            total: [],
+            normal: [],
+            plague: [],
+            superbreed: [],
+            cleaner: [],
+            mutated: []
+        };
         this.draw();
         this.updateStats();
     }
@@ -1123,6 +1146,7 @@ class GameOfLife {
         }
 
         const avgResources = Math.round((totalResources / cellCount) * 100);
+        const normalCount = population - plaguedCount - superbreedCount - cleanerCount - mutatedCount;
 
         document.getElementById('generation').textContent = this.generation;
         document.getElementById('population').textContent = population;
@@ -1133,14 +1157,27 @@ class GameOfLife {
         document.getElementById('catastropheCount').textContent = this.catastropheCount;
         document.getElementById('avgResources').textContent = avgResources;
 
-        // Update population history for graph
-        this.populationHistory.push(population);
-        if (this.populationHistory.length > this.maxHistoryLength) {
-            this.populationHistory.shift();
+        // Update population history for graph (all cell types)
+        this.populationHistory.total.push(population);
+        this.populationHistory.normal.push(normalCount);
+        this.populationHistory.plague.push(plaguedCount);
+        this.populationHistory.superbreed.push(superbreedCount);
+        this.populationHistory.cleaner.push(cleanerCount);
+        this.populationHistory.mutated.push(mutatedCount);
+
+        // Trim history to max length
+        if (this.populationHistory.total.length > this.maxHistoryLength) {
+            this.populationHistory.total.shift();
+            this.populationHistory.normal.shift();
+            this.populationHistory.plague.shift();
+            this.populationHistory.superbreed.shift();
+            this.populationHistory.cleaner.shift();
+            this.populationHistory.mutated.shift();
         }
 
-        // Draw population graph
+        // Draw graphs
         this.drawGraph();
+        this.drawBarChart();
     }
 
     drawGraph() {
@@ -1154,11 +1191,18 @@ class GameOfLife {
         this.graphCtx.fillStyle = 'rgba(0, 0, 0, 0.5)';
         this.graphCtx.fillRect(0, 0, width, height);
 
-        if (this.populationHistory.length < 2) return;
+        if (this.populationHistory.total.length < 2) return;
 
-        // Find min and max for scaling
-        const maxPop = Math.max(...this.populationHistory, 1);
-        const minPop = Math.min(...this.populationHistory, 0);
+        // Find min and max for scaling across all cell types
+        const allValues = [
+            ...this.populationHistory.total,
+            ...this.populationHistory.plague,
+            ...this.populationHistory.superbreed,
+            ...this.populationHistory.cleaner,
+            ...this.populationHistory.mutated
+        ];
+        const maxPop = Math.max(...allValues, 1);
+        const minPop = 0;
         const range = maxPop - minPop || 1;
 
         // Draw grid lines
@@ -1172,34 +1216,133 @@ class GameOfLife {
             this.graphCtx.stroke();
         }
 
-        // Draw population line
-        this.graphCtx.strokeStyle = getComputedStyle(document.documentElement)
-            .getPropertyValue('--primary-color') || '#00f0ff';
-        this.graphCtx.lineWidth = 2;
-        this.graphCtx.beginPath();
-
-        const dataPoints = this.populationHistory.length;
+        const dataPoints = this.populationHistory.total.length;
         const xStep = (width - padding * 2) / (this.maxHistoryLength - 1);
 
-        for (let i = 0; i < dataPoints; i++) {
-            const x = padding + xStep * i;
-            const normalizedValue = (this.populationHistory[i] - minPop) / range;
-            const y = height - padding - (height - padding * 2) * normalizedValue;
+        // Helper function to draw a line
+        const drawLine = (data, color, lineWidth) => {
+            this.graphCtx.strokeStyle = color;
+            this.graphCtx.lineWidth = lineWidth;
+            this.graphCtx.beginPath();
 
-            if (i === 0) {
-                this.graphCtx.moveTo(x, y);
-            } else {
-                this.graphCtx.lineTo(x, y);
+            for (let i = 0; i < dataPoints; i++) {
+                const x = padding + xStep * i;
+                const normalizedValue = (data[i] - minPop) / range;
+                const y = height - padding - (height - padding * 2) * normalizedValue;
+
+                if (i === 0) {
+                    this.graphCtx.moveTo(x, y);
+                } else {
+                    this.graphCtx.lineTo(x, y);
+                }
             }
-        }
 
-        this.graphCtx.stroke();
+            this.graphCtx.stroke();
+        };
 
-        // Draw current value text
-        this.graphCtx.fillStyle = getComputedStyle(document.documentElement)
+        // Draw lines for each cell type (thinner, semi-transparent)
+        drawLine(this.populationHistory.plague, 'rgba(255, 107, 107, 0.8)', 1.5);    // Red
+        drawLine(this.populationHistory.superbreed, 'rgba(249, 202, 36, 0.8)', 1.5); // Gold
+        drawLine(this.populationHistory.cleaner, 'rgba(72, 219, 251, 0.8)', 1.5);    // Cyan
+        drawLine(this.populationHistory.mutated, 'rgba(168, 85, 247, 0.8)', 1.5);    // Purple
+
+        // Draw total population line (thicker, brighter)
+        const primaryColor = getComputedStyle(document.documentElement)
             .getPropertyValue('--primary-color') || '#00f0ff';
-        this.graphCtx.font = '12px monospace';
-        this.graphCtx.fillText(`Max: ${maxPop}`, padding + 5, padding + 12);
+        drawLine(this.populationHistory.total, primaryColor, 2.5);
+
+        // Draw legend and max value
+        this.graphCtx.font = '10px monospace';
+        const legendY = padding + 12;
+        this.graphCtx.fillStyle = primaryColor;
+        this.graphCtx.fillText(`Max: ${maxPop}`, padding + 5, legendY);
+    }
+
+    drawBarChart() {
+        if (!this.barCtx) return;
+
+        const width = this.barCanvas.width;
+        const height = this.barCanvas.height;
+        const padding = 15;
+
+        // Clear canvas
+        this.barCtx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+        this.barCtx.fillRect(0, 0, width, height);
+
+        if (this.populationHistory.total.length === 0) return;
+
+        // Get current populations
+        const idx = this.populationHistory.total.length - 1;
+        const populations = {
+            normal: this.populationHistory.normal[idx] || 0,
+            plague: this.populationHistory.plague[idx] || 0,
+            superbreed: this.populationHistory.superbreed[idx] || 0,
+            cleaner: this.populationHistory.cleaner[idx] || 0,
+            mutated: this.populationHistory.mutated[idx] || 0
+        };
+
+        const total = this.populationHistory.total[idx] || 1;
+        const maxValue = total;
+
+        // Bar configuration
+        const bars = [
+            { label: 'Normal', value: populations.normal, color: '#00f0ff', emoji: '⬜' },
+            { label: 'Plague', value: populations.plague, color: '#ff6b6b', emoji: '🦠' },
+            { label: 'Super', value: populations.superbreed, color: '#f9ca24', emoji: '⭐' },
+            { label: 'Clean', value: populations.cleaner, color: '#48dbfb', emoji: '✨' },
+            { label: 'Mutant', value: populations.mutated, color: '#a855f7', emoji: '🧬' }
+        ];
+
+        const barCount = bars.length;
+        const barSpacing = 8;
+        const chartWidth = width - padding * 2;
+        const chartHeight = height - padding * 2 - 20; // Leave space for labels
+        const barWidth = (chartWidth - (barCount - 1) * barSpacing) / barCount;
+
+        // Pulsating effect
+        const pulsePhase = (this.animationTime % 1500) / 1500;
+        const pulse = Math.sin(pulsePhase * Math.PI * 2) * 0.1 + 1; // 0.9 to 1.1
+
+        bars.forEach((bar, index) => {
+            const x = padding + index * (barWidth + barSpacing);
+            const heightRatio = maxValue > 0 ? (bar.value / maxValue) : 0;
+            const barHeight = chartHeight * heightRatio * pulse; // Apply pulsating effect
+            const y = padding + chartHeight - barHeight;
+
+            // Draw bar with gradient
+            const gradient = this.barCtx.createLinearGradient(x, y, x, y + barHeight);
+            gradient.addColorStop(0, bar.color);
+            gradient.addColorStop(1, bar.color + '80'); // Add transparency
+
+            this.barCtx.fillStyle = gradient;
+            this.barCtx.fillRect(x, y, barWidth, barHeight);
+
+            // Draw bar outline
+            this.barCtx.strokeStyle = bar.color;
+            this.barCtx.lineWidth = 1;
+            this.barCtx.strokeRect(x, y, barWidth, barHeight);
+
+            // Draw value on top of bar
+            if (bar.value > 0) {
+                this.barCtx.fillStyle = '#ffffff';
+                this.barCtx.font = 'bold 10px monospace';
+                this.barCtx.textAlign = 'center';
+                this.barCtx.fillText(bar.value, x + barWidth / 2, y - 5);
+            }
+
+            // Draw label below bar
+            this.barCtx.fillStyle = bar.color;
+            this.barCtx.font = '9px monospace';
+            this.barCtx.textAlign = 'center';
+            this.barCtx.fillText(bar.emoji, x + barWidth / 2, height - padding + 12);
+        });
+
+        // Draw title
+        this.barCtx.fillStyle = getComputedStyle(document.documentElement)
+            .getPropertyValue('--primary-color') || '#00f0ff';
+        this.barCtx.font = '10px monospace';
+        this.barCtx.textAlign = 'left';
+        this.barCtx.fillText(`Total: ${total}`, padding, padding - 2);
     }
 
     animate(currentTime = 0) {
