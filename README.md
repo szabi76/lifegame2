@@ -1,6 +1,6 @@
 # Advanced Game of Life
 
-An enhanced implementation of Conway's Game of Life with advanced cellular mechanics, visual effects, and interactive features.
+An enhanced implementation of Conway's Game of Life featuring advanced cellular mechanics, reaction-diffusion chemistry, resource systems, and stunning visual effects. This project extends the classic cellular automaton with multiple cell types, mutations, environmental systems, and interactive catastrophes.
 
 ![Advanced Game of Life](https://img.shields.io/badge/version-2.0-blue.svg)
 ![JavaScript](https://img.shields.io/badge/JavaScript-ES6+-yellow.svg)
@@ -19,78 +19,145 @@ An enhanced implementation of Conway's Game of Life with advanced cellular mecha
 ### Advanced Cell Types
 
 #### 🦠 Plague Cells (Red Circles)
-- Infectious disease that spreads through the population
-- Consume 2× resources per generation
-- 25% infection chance to neighbors
-- 40% mortality chance after age 5
-- Auto-infect cells born in chaos zones
+- **Visual**: Rendered as red circles with shadow glow
+- **Resource consumption**: 0.02 per generation (2× normal rate)
+- **Infection spread**: 25% chance to infect neighboring cells each generation
+- **Mortality**: After age 5, 40% chance of death per generation
+- **Special behavior**: Cells born in catastrophe chaos zones are automatically plagued
+- **Trigger**: Click "🦠 Infect" button (affects 25% of living cells)
+- **Color gradient**: Ages from #ff6b6b (bright red) to #a93226 (dark red)
 
 #### ⭐ Superbreed Cells (Gold Diamonds)
-- Enhanced survival (1-4 neighbors instead of 2-3)
-- Can birth new cells with only 2 neighbors
-- 30% chance to pass trait to offspring
+- **Visual**: Rendered as gold diamond shapes with shadow glow
+- **Enhanced survival**: Survive with 1-4 neighbors (vs normal 2-3)
+- **Enhanced reproduction**: Can birth new cells with only 2 superbreed neighbors
+- **Inheritance**: 30% chance to pass superbreed trait to offspring
+- **Trigger**: Click "⭐ Enhance" button (affects 20% of living cells)
+- **Color gradient**: Ages from #f9ca24 (bright gold) to #ff6348 (orange-red)
 
-#### ✨ Cleaner Cells (Cyan Pulsating)
-- Remove special properties from neighboring cells
-- Emit sparkle particle effects
-- 30% chance to spread cleaner trait
+#### ✨ Cleaner Cells (Cyan Pulsating Circles)
+- **Visual**: Rendered as cyan pulsating circles (pulse period: 1 second)
+- **Cleaning power**: Remove all special properties from neighboring cells
+- **Particle effects**: 5% chance per generation to emit cyan sparkle particles
+- **Inheritance**: 30% chance to pass cleaner trait to offspring
+- **Priority**: Cleaner trait overrides all other cell types
+- **Trigger**: Click "✨ Deploy" button (affects 15% of living cells)
+- **Color gradient**: Ages from #48dbfb (bright cyan) to #87ceeb (sky blue)
 
 #### 🧬 Mutated Cells (Purple Hexagons)
-- Result of random mutations (5% default rate, adjustable 0-20%)
-- Gain superbreed survival abilities
-- Keep original specialty traits
+- **Visual**: Rendered as purple hexagons with shadow glow
+- **Mutation rate**: 5% base rate (adjustable 0-20% via slider)
+- **Hybrid abilities**: Gain superbreed survival (1-4 neighbors) while keeping original specialty
+- **Stackable**: Can be mutated plague, mutated superbreed, etc.
+- **Removal**: Can only be removed by cleaner cells
+- **Color gradient**: Ages from #a855f7 (bright purple) to #5b21b6 (deep violet)
 
 ### Environmental Systems
 
 #### ⚡ Resource/Energy System
-- Each cell location has a resource level (0-100%)
-- Living cells consume resources per generation
-- Resources regenerate slowly at 0.5% per generation
-- Low resources (<30%) increase death chance by 30%
-- Birth requires >20% resources
+- **Initial state**: Each grid cell starts at 100% resources (value: 1.0)
+- **Consumption**: Normal cells consume 0.01 per generation, plague cells consume 0.02
+- **Regeneration**: Resources regenerate at 0.5% (0.005) per generation, up to 100%
+- **Death penalty**: When resources < 30%, cells have 30% increased death chance
+- **Birth requirement**: Birth requires > 20% resources available at that location
+- **Display**: Average resource level shown in "⚡" indicator as percentage
+- **RD interaction**: Reaction-diffusion chemical A increases resources, B decreases them
 
 #### 💥 Catastrophe System
-- Random disaster events with 10-20 cell radius
-- Creates lasting chaos zones with pulsating markers
-- Auto-plagues cells born in affected areas
-- Spawns colorful explosion particles
+- **Impact zone**: Random radius between 10-20 cells
+- **Immediate effect**: Instantly kills all cells within blast radius
+- **Chaos markers**: Creates pulsating neon gradient markers at impact site
+- **Marker intensity**: Based on distance from center, decays at 0.5 per generation
+- **Infection zone**: Cells born in chaos zones (intensity > 0) are automatically plagued
+- **Visual effects**:
+  - Spawns 30 explosion particles (colors: magenta, pink, red, orange)
+  - Death particles (gray) spawn for 10% of destroyed cells
+  - Pulsating radial gradient with RGB(255,0,255) to RGB(0,255,255) spectrum
+- **Trigger**: Click "💥 Destroy" button
+- **Counter**: Tracks total number of catastrophes triggered
+
+#### 🧪 Reaction-Diffusion Chemistry (Gray-Scott Model)
+- **System**: Simulates two interacting chemicals creating organic patterns
+- **Chemical A**: Nutrients - increases resource levels in grid cells
+- **Chemical B**: Toxins - decreases resource levels in grid cells
+- **Cell interaction**: Living cells consume A and produce B, creating feedback loops
+- **Algorithm**: Gray-Scott equations with 9-point weighted diffusion stencil
+- **Update frequency**: Every 2 frames for performance optimization
+- **Topology**: Respects edge wrapping settings (toroidal if enabled)
+- **Presets** (Feed, Kill, Diffusion A, Diffusion B):
+  - **Coral**: f=0.0545, k=0.062, Da=1.0, Db=0.5 (default)
+  - **Mitosis**: f=0.0367, k=0.0649, Da=1.0, Db=0.5
+  - **Waves**: f=0.014, k=0.054, Da=1.0, Db=0.5
+  - **Maze**: f=0.029, k=0.057, Da=1.0, Db=0.5
+  - **Fingerprint**: f=0.055, k=0.062, Da=1.0, Db=0.5
+- **Adjustable parameters**:
+  - Feed rate (f): 0.010-0.080
+  - Kill rate (k): 0.040-0.070
+  - Diffusion A: 0.8-1.2
+  - Diffusion B: 0.4-0.6
+  - Opacity: 0-100% (blending with cellular layer)
+- **Color mapping**: HSL based on chemical concentrations, creating dynamic patterns
+- **Enable/Disable**: Toggle via "Enable RD" checkbox in Chemistry section
+- **Reset**: Reinitialize with random seed patterns
 
 ### Visual Features
 
 #### 🎨 Themes
-Choose from 5 color themes:
-- **Neon** (default)
-- **Ocean**
-- **Sunset**
-- **Matrix**
-- **Fire**
+Choose from 5 distinct color themes (affects normal cells and UI):
+- **Neon** (default): Cyan to blue gradient (#00f0ff → #0050ff)
+- **Ocean**: Turquoise to blue gradient (#00fff7 → #0050ff)
+- **Sunset**: Gold to red gradient (#ffd23f → #ff5647)
+- **Matrix**: Neon green gradient (#39ff14 → #006617)
+- **Fire**: Orange to red gradient (#ffa500 → #ff0000)
 
 #### 📐 Classic Patterns
-Pre-built patterns for exploration:
-- Glider
-- Pulsar
-- LWSS (Lightweight Spaceship)
-- Gosper Glider Gun
-- Pentadecathlon
-- Acorn
+Pre-built patterns for exploration (loaded at grid center):
+- **Glider**: Small spaceship that moves diagonally
+- **Pulsar**: Period-3 oscillator with symmetrical structure
+- **LWSS**: Lightweight spaceship that travels horizontally
+- **Gosper Glider Gun**: First discovered infinite growth pattern
+- **Pentadecathlon**: Period-15 oscillator
+- **Acorn**: Methuselah pattern that stabilizes after 5,206 generations
 
-#### ✨ Particle Effects
-- **Explosion**: Colorful bursts from catastrophes
-- **Sparkle**: Cyan twinkles from cleaner cells
-- **Death**: Gray particles from cell destruction
+#### ✨ Particle System
+Three types of physics-based particles with independent lifecycles:
+- **Explosion particles**:
+  - Spawned: 30 per catastrophe event
+  - Colors: Magenta (#ff00ff), pink (#ff0088), red (#ff0000), orange (#ff8800)
+  - Max life: 20 frames
+  - Speed: 2-5 pixels per frame with 95% friction
+  - Size: 2-5 pixels with shadow blur
+- **Sparkle particles**:
+  - Spawned: 5% chance per cleaner cell per generation
+  - Color: Cyan (#48dbfb)
+  - Max life: 30 frames
+  - Speed: 0.5-1.5 pixels per frame with 95% friction
+  - Size: 1-3 pixels with pulsating glow
+- **Death particles**:
+  - Spawned: 10% of cells killed in catastrophe
+  - Color: Gray (#888888)
+  - Max life: 30 frames
+  - Speed: 0.5-1.5 pixels per frame with 95% friction
 
 #### 📊 Data Visualization
-- **Population Timeline**: 100-generation history graph
-- **Bar Chart**: Real-time cell type distribution
-- **Statistics Dashboard**: Generation count, population, FPS
+- **Population Timeline Graph**:
+  - Tracks last 100 generations of population history
+  - Separate lines for: Total, Normal, Plague, Superbreed, Cleaner, Mutated
+  - Auto-scaling Y-axis based on max population
+  - Rendered on 240×140px canvas with grid background
+  - Theme-colored primary line with semi-transparent type-specific lines
+- **Bar Chart**:
+  - Real-time population distribution by cell type
+  - Pulsating bars (period: 1.5 seconds, amplitude: ±10%)
+  - Gradient fills with type-specific colors
+  - Value labels above each bar, emoji labels below
+  - Total population displayed at top
+- **Statistics Dashboard**:
+  - Generation count, total population, actual FPS
+  - Cell type counts (plague, superbreed, cleaner, mutated)
+  - Catastrophe counter
+  - Average resource percentage across all cells
 
-### 🧪 Reaction-Diffusion Chemistry
-
-Gray-Scott reaction-diffusion system that creates organic patterns:
-- **Presets**: Coral, Mitosis, Waves, Maze, Fingerprint
-- **Adjustable Parameters**: Feed rate, kill rate, diffusion coefficients
-- **Resource Coupling**: Interacts with Game of Life resource system
-- **Opacity Control**: Blend chemistry layer with cellular automata
 
 ## Getting Started
 
@@ -161,28 +228,134 @@ lifegame2/
 
 ## How It Works
 
-### Cellular Automata
-The simulation follows Conway's Game of Life rules with extensions:
-1. **Birth**: Dead cell with exactly 3 neighbors becomes alive
-2. **Survival**: Live cell with 2-3 neighbors survives
-3. **Death**: All other cells die from loneliness or overcrowding
+### Cellular Automata Rules
+The simulation follows Conway's Game of Life rules with advanced extensions:
 
-### Resource Model
-Cells compete for limited resources in their location, creating realistic population dynamics and preventing infinite growth.
+**Standard Rules** (for normal cells):
+1. **Birth**: Dead cell with exactly 3 living neighbors becomes alive
+2. **Survival**: Live cell with 2 or 3 neighbors survives to next generation
+3. **Death**: All other cells die from isolation (<2 neighbors) or overcrowding (>3 neighbors)
 
-### Mutation System
-Random mutations create evolutionary pressure, allowing advantageous traits to spread through the population.
+**Modified Rules** (for special cells):
+- **Superbreed/Mutated cells**: Survive with 1, 2, 3, or 4 neighbors (more resilient)
+- **Superbreed reproduction**: Dead cells with 2 neighbors can birth if any neighbor is superbreed
+- **Plague mortality**: Plagued cells age 5+ have additional 40% death chance per generation
+- **Resource constraints**: Cells in low-resource areas (<30%) have 30% increased death chance
+- **Birth requirements**: Birth only occurs if local resources exceed 20%
 
-### Reaction-Diffusion
-The Gray-Scott model simulates chemical reactions that create organic, lifelike patterns independent of cellular automata rules.
+### Resource Economics
+Cells operate within a limited resource economy:
+- Each grid location has independent resource pool (0-100%)
+- Normal cells consume 0.01 (1%) per generation
+- Plagued cells consume 0.02 (2%) per generation (disease is costly)
+- Empty cells regenerate at 0.005 (0.5%) per generation
+- Creates natural population limits and boom-bust cycles
+- Prevents infinite growth even in stable patterns
+
+### Evolutionary Dynamics
+Multiple inheritance and mutation mechanisms:
+
+**Trait Inheritance**:
+- Plague: 25% chance to inherit from plagued neighbors
+- Superbreed: 30% chance to inherit from superbreed neighbors
+- Cleaner: 30% chance to inherit from cleaner neighbors
+
+**Mutation**:
+- Random mutation chance each generation (default 5%, adjustable 0-20%)
+- Mutated cells gain superbreed survival rules while keeping original specialty
+- Creates hybrid super-cells with combined advantages
+- Can only be removed by cleaner cells (natural selection pressure)
+
+**Priority System**:
+1. Cleaner trait overrides everything (highest priority)
+2. Cells born in chaos zones are auto-plagued
+3. Plague can override superbreed in spreading
+4. Mutation preserves existing specialty
+
+### Reaction-Diffusion Chemistry
+Independent chemical system based on Gray-Scott equations:
+
+**Mathematical Model**:
+```
+dA/dt = Da·∇²A - AB² + f(1-A)
+dB/dt = Db·∇²B + AB² - (k+f)B
+```
+
+Where:
+- A = nutrient chemical (promotes life)
+- B = toxin chemical (inhibits life)
+- f = feed rate (nutrient replenishment)
+- k = kill rate (toxin removal)
+- Da, Db = diffusion coefficients
+- ∇² = Laplacian operator (9-point stencil)
+
+**Cellular Coupling**:
+- Living cells consume chemical A (nutrients) and produce B (toxins)
+- Chemical A increases local resource levels
+- Chemical B decreases local resource levels
+- Creates feedback loop between chemistry and cellular automata
+- Different presets create diverse emergent patterns
+
+## Technical Implementation
+
+### Architecture
+- **Object-oriented design**: Main `GameOfLife` class encapsulates all game state and logic
+- **Particle system**: Separate `Particle` class for visual effects with independent physics
+- **Double buffering**: Uses `grid` and `nextGrid` arrays to prevent read-write conflicts
+- **Separated concerns**: Cell state, age, and special properties tracked in separate 2D arrays
+
+### Performance Optimizations
+- **RD update throttling**: Reaction-diffusion updates every 2 frames instead of every frame
+- **Particle culling**: Particles automatically removed when life reaches 0
+- **Canvas optimization**: Single canvas clear and redraw per frame
+- **Grid size adaptation**: Grid dimensions calculated based on viewport and cell size
+- **Efficient neighbor counting**: Pre-computed offsets with edge wrapping support
+
+### Rendering Pipeline
+1. Clear canvas (black background)
+2. Render reaction-diffusion layer (if enabled, with opacity blending)
+3. Draw chaos markers with pulsating radial gradients
+4. Draw cells with shape-specific rendering (squares, circles, diamonds, hexagons)
+5. Draw particle effects with alpha blending
+6. Draw grid lines (if enabled)
+7. Update statistics and graphs
+
+### Cell Shape Rendering
+- **Normal cells**: Squares (fillRect) with shadow glow
+- **Plague cells**: Circles (arc) with shadow glow
+- **Superbreed cells**: Diamonds (4-point path) with shadow glow
+- **Mutated cells**: Hexagons (6-point path) with shadow glow
+- **Cleaner cells**: Pulsating circles with animated radius
+
+### Animation System
+- **RequestAnimationFrame**: Smooth 60 FPS rendering loop
+- **Delta time calculation**: Frame-rate independent simulation updates
+- **Animation time tracking**: Global time variable for pulsating effects
+- **Separate update rates**: Simulation can run at different speed than rendering
+
+## Performance Characteristics
+
+### Typical Performance
+- **Grid size**: 120×90 cells on 1920×1080 display with 8px cells
+- **60 FPS rendering**: Constant smooth visual updates
+- **Variable simulation speed**: 1-60 generations per second (user adjustable)
+- **Particle limit**: Dynamic based on spawn rate (typically 50-200 active particles)
+- **Memory usage**: Approximately 5-10 MB for grid arrays and state tracking
+
+### Scalability
+- **Small grids** (4px cells): Can handle 400×300 grids smoothly
+- **Large grids** (20px cells): Runs at lower resolutions for visual clarity
+- **RD performance**: Disabled by default, adds ~20% computational overhead when enabled
+- **Browser compatibility**: Runs on all modern browsers with HTML5 Canvas support
 
 ## Contributing
 
 Contributions are welcome! Feel free to:
-- Report bugs
-- Suggest new features
-- Submit pull requests
-- Improve documentation
+- Report bugs or issues
+- Suggest new features or cell types
+- Submit pull requests with improvements
+- Improve documentation or add examples
+- Share interesting patterns or configurations
 
 ## License
 
@@ -190,19 +363,24 @@ This project is open source and available under the MIT License.
 
 ## Acknowledgments
 
-- John Conway for creating the original Game of Life
-- The cellular automata community for inspiration
-- Gray-Scott reaction-diffusion model researchers
+- **John Conway** (1937-2020) for inventing Conway's Game of Life
+- **Pearson & Ponce de León** for Gray-Scott reaction-diffusion research
+- The **cellular automata community** for decades of pattern discovery
+- **HTML5 Canvas API** developers for high-performance 2D graphics
 
-## Future Enhancements
+## Future Enhancement Ideas
 
 Potential features for future versions:
-- Save/load grid states
-- Custom rule sets (e.g., HighLife, Day & Night)
-- Multi-threaded computation for larger grids
-- Pattern recognition and statistics
-- Network multiplayer mode
+- **Save/Load system**: Export/import grid states and configurations as JSON
+- **Custom rule sets**: Support for alternative CA rules (HighLife, Day & Night, Seeds, etc.)
+- **Pattern library**: Built-in collection of interesting discovered patterns
+- **Multi-threaded computation**: Web Workers for larger grids and faster simulation
+- **Pattern recognition**: Automatic detection of oscillators, spaceships, and still lifes
+- **Recording/Replay**: Capture simulation history and replay at variable speeds
+- **Network multiplayer**: Shared grids with collaborative/competitive modes
+- **Shader-based rendering**: WebGL for GPU-accelerated graphics and computation
+- **Sound synthesis**: Audio generated from population dynamics and events
 
 ---
 
-**Enjoy exploring the fascinating world of cellular automata!** 🎮✨
+**Enjoy exploring the fascinating world of cellular automata and emergent complexity!** 🎮✨🧬
