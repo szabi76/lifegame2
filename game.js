@@ -1,7 +1,66 @@
+// Particle class for visual effects
+class Particle {
+    constructor(x, y, type, color) {
+        this.x = x;
+        this.y = y;
+        this.type = type; // 'explosion', 'sparkle', 'death'
+        this.color = color;
+        this.life = 1.0;
+        this.maxLife = type === 'explosion' ? 20 : 30;
+        this.age = 0;
+
+        // Random velocity
+        const angle = Math.random() * Math.PI * 2;
+        const speed = type === 'explosion' ? Math.random() * 3 + 2 : Math.random() * 1 + 0.5;
+        this.vx = Math.cos(angle) * speed;
+        this.vy = Math.sin(angle) * speed;
+
+        this.size = type === 'explosion' ? Math.random() * 3 + 2 : Math.random() * 2 + 1;
+    }
+
+    update() {
+        this.x += this.vx;
+        this.y += this.vy;
+        this.vx *= 0.95; // Friction
+        this.vy *= 0.95;
+        this.age++;
+        this.life = 1 - (this.age / this.maxLife);
+        return this.life > 0;
+    }
+
+    draw(ctx) {
+        ctx.save();
+        ctx.globalAlpha = this.life;
+        ctx.fillStyle = this.color;
+
+        if (this.type === 'sparkle') {
+            // Star shape
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = this.color;
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.size * this.life, 0, Math.PI * 2);
+            ctx.fill();
+        } else {
+            // Circle
+            ctx.shadowBlur = 8;
+            ctx.shadowColor = this.color;
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        ctx.restore();
+    }
+}
+
 class GameOfLife {
     constructor() {
         this.canvas = document.getElementById('gameCanvas');
         this.ctx = this.canvas.getContext('2d');
+
+        // Graph canvas
+        this.graphCanvas = document.getElementById('populationGraph');
+        this.graphCtx = this.graphCanvas ? this.graphCanvas.getContext('2d') : null;
 
         // Game state
         this.cellSize = 8;
@@ -12,6 +71,8 @@ class GameOfLife {
         this.cellPlagued = []; // Track plagued cells
         this.cellSuperbreed = []; // Track superbreed cells
         this.cellCleaner = []; // Track cleaner cells
+        this.cellMutated = []; // Track mutated cells (hybrids)
+        this.resources = []; // Track resource/energy levels
         this.chaosMarkers = []; // Track chaos/catastrophe affected areas
         this.nextGrid = [];
         this.isRunning = false;
@@ -19,6 +80,9 @@ class GameOfLife {
         this.fps = 10;
         this.lastFrameTime = 0;
         this.frameInterval = 1000 / this.fps;
+
+        // Particle system
+        this.particles = [];
 
         // Features
         this.showAging = true;
@@ -31,6 +95,11 @@ class GameOfLife {
         this.catastropheImpact = 15; // Initial impact zone intensity
         this.catastropheCount = 0;
         this.animationTime = 0; // For pulsating animations
+        this.mutationRate = 0.05; // 5% mutation chance
+
+        // Population history for graph (store last 100 generations)
+        this.populationHistory = [];
+        this.maxHistoryLength = 100;
 
         // Interaction
         this.isDrawing = false;
@@ -73,7 +142,9 @@ class GameOfLife {
         this.cellPlagued = this.createEmptyGrid();
         this.cellSuperbreed = this.createEmptyGrid();
         this.cellCleaner = this.createEmptyGrid();
+        this.cellMutated = this.createEmptyGrid();
         this.chaosMarkers = this.createEmptyGrid();
+        this.resources = this.createResourceGrid();
         this.nextGrid = this.createEmptyGrid();
 
         this.draw();
@@ -82,6 +153,11 @@ class GameOfLife {
 
     createEmptyGrid() {
         return Array(this.rows).fill(null).map(() => Array(this.cols).fill(0));
+    }
+
+    createResourceGrid() {
+        // Initialize resources at 100% (value 1.0)
+        return Array(this.rows).fill(null).map(() => Array(this.cols).fill(1.0));
     }
 
     setupEventListeners() {
@@ -172,6 +248,12 @@ class GameOfLife {
         catastropheImpactSlider.addEventListener('input', (e) => {
             this.catastropheImpact = parseInt(e.target.value);
             document.getElementById('catastropheImpactValue').textContent = e.target.value;
+        });
+
+        const mutationRateSlider = document.getElementById('mutationRate');
+        mutationRateSlider.addEventListener('input', (e) => {
+            this.mutationRate = parseInt(e.target.value) / 100;
+            document.getElementById('mutationRateValue').textContent = e.target.value;
         });
 
         // Collapsible sections
@@ -283,6 +365,7 @@ class GameOfLife {
                 this.cellPlagued[row][col] = 0;
                 this.cellSuperbreed[row][col] = 0;
                 this.cellCleaner[row][col] = 0;
+                this.cellMutated[row][col] = 0;
                 this.chaosMarkers[row][col] = 0;
                 this.lastCell = cellKey;
                 this.draw();
@@ -305,9 +388,13 @@ class GameOfLife {
         this.cellPlagued = this.createEmptyGrid();
         this.cellSuperbreed = this.createEmptyGrid();
         this.cellCleaner = this.createEmptyGrid();
+        this.cellMutated = this.createEmptyGrid();
         this.chaosMarkers = this.createEmptyGrid();
+        this.resources = this.createResourceGrid();
         this.generation = 0;
         this.catastropheCount = 0;
+        this.particles = [];
+        this.populationHistory = [];
         this.draw();
         this.updateStats();
     }
@@ -320,11 +407,14 @@ class GameOfLife {
                 this.cellPlagued[row][col] = 0;
                 this.cellSuperbreed[row][col] = 0;
                 this.cellCleaner[row][col] = 0;
+                this.cellMutated[row][col] = 0;
                 this.chaosMarkers[row][col] = 0;
             }
         }
         this.generation = 0;
         this.catastropheCount = 0;
+        this.particles = [];
+        this.populationHistory = [];
         this.draw();
         this.updateStats();
     }
@@ -386,18 +476,34 @@ class GameOfLife {
         const centerCol = Math.floor(Math.random() * this.cols);
         const radius = Math.floor(Math.random() * 10) + 10; // Radius 10-20 for bigger impact
 
+        // Create explosion particles at center
+        const centerX = centerCol * this.cellSize + this.cellSize / 2;
+        const centerY = centerRow * this.cellSize + this.cellSize / 2;
+        for (let i = 0; i < 30; i++) {
+            const color = ['#ff00ff', '#ff0088', '#ff0000', '#ff8800'][Math.floor(Math.random() * 4)];
+            this.particles.push(new Particle(centerX, centerY, 'explosion', color));
+        }
+
         for (let row = 0; row < this.rows; row++) {
             for (let col = 0; col < this.cols; col++) {
                 const distance = Math.sqrt(
                     Math.pow(row - centerRow, 2) + Math.pow(col - centerCol, 2)
                 );
                 if (distance <= radius) {
+                    // Create death particles for destroyed cells
+                    if (this.grid[row][col] === 1 && Math.random() < 0.1) {
+                        const x = col * this.cellSize + this.cellSize / 2;
+                        const y = row * this.cellSize + this.cellSize / 2;
+                        this.particles.push(new Particle(x, y, 'death', '#888888'));
+                    }
+
                     // Kill all cells in impact zone
                     this.grid[row][col] = 0;
                     this.cellAge[row][col] = 0;
                     this.cellPlagued[row][col] = 0;
                     this.cellSuperbreed[row][col] = 0;
                     this.cellCleaner[row][col] = 0;
+                    this.cellMutated[row][col] = 0;
 
                     // Set chaos marker intensity based on distance from center
                     const intensity = Math.max(0, this.catastropheImpact * (1 - distance / radius));
@@ -527,6 +633,11 @@ class GameOfLife {
                         this.chaosMarkers[row][col] = 0;
                     }
                 }
+
+                // Regenerate resources slowly (0.5% per generation)
+                if (this.resources[row][col] < 1.0) {
+                    this.resources[row][col] = Math.min(1.0, this.resources[row][col] + 0.005);
+                }
             }
         }
 
@@ -534,6 +645,7 @@ class GameOfLife {
         const nextPlagued = this.createEmptyGrid();
         const nextSuperbreed = this.createEmptyGrid();
         const nextCleaner = this.createEmptyGrid();
+        const nextMutated = this.createEmptyGrid();
 
         // Create next generation
         for (let row = 0; row < this.rows; row++) {
@@ -543,20 +655,35 @@ class GameOfLife {
                 const isPlagued = this.cellPlagued[row][col] === 1;
                 const isSuperbreed = this.cellSuperbreed[row][col] === 1;
                 const isCleaner = this.cellCleaner[row][col] === 1;
+                const isMutated = this.cellMutated[row][col] === 1;
 
                 // Modified Conway's rules with advanced features
                 if (currentState === 1) {
+                    // Consume resources (living cells use energy)
+                    const consumption = isPlagued ? 0.02 : 0.01; // Plagued cells consume more
+                    this.resources[row][col] = Math.max(0, this.resources[row][col] - consumption);
+
                     // Cell is alive
                     let surviveNeighbors = [2, 3];
 
                     // Superbreed cells survive with less neighbors
-                    if (isSuperbreed) {
+                    if (isSuperbreed || isMutated) {
                         surviveNeighbors = [1, 2, 3, 4];
                     }
 
-                    if (surviveNeighbors.includes(neighbors)) {
+                    // Low resources make survival harder
+                    const resourcePenalty = this.resources[row][col] < 0.3 ? Math.random() < 0.3 : false;
+
+                    if (surviveNeighbors.includes(neighbors) && !resourcePenalty) {
                         this.nextGrid[row][col] = 1;
                         this.cellAge[row][col]++;
+
+                        // Create sparkle particles for cleaner cells occasionally
+                        if (isCleaner && Math.random() < 0.05) {
+                            const x = col * this.cellSize + this.cellSize / 2;
+                            const y = row * this.cellSize + this.cellSize / 2;
+                            this.particles.push(new Particle(x, y, 'sparkle', '#48dbfb'));
+                        }
 
                         // Cleaner cells clean neighbors
                         const cleanerNeighbors = this.countCleanerNeighbors(row, col);
@@ -566,11 +693,19 @@ class GameOfLife {
                             nextCleaner[row][col] = 1;
                             nextPlagued[row][col] = 0;
                             nextSuperbreed[row][col] = 0;
+                            nextMutated[row][col] = 0;
                         } else {
-                            // Copy plague/superbreed state
+                            // Copy cell states
                             nextPlagued[row][col] = isPlagued ? 1 : 0;
                             nextSuperbreed[row][col] = isSuperbreed ? 1 : 0;
                             nextCleaner[row][col] = 0;
+                            nextMutated[row][col] = isMutated ? 1 : 0;
+
+                            // Mutation chance - cells can mutate to gain hybrid properties
+                            if (!isMutated && Math.random() < this.mutationRate) {
+                                nextMutated[row][col] = 1;
+                                // Mutated cells keep their original specialty
+                            }
                         }
 
                         // Plague kills cells after some time
@@ -587,6 +722,7 @@ class GameOfLife {
                         nextPlagued[row][col] = 0;
                         nextSuperbreed[row][col] = 0;
                         nextCleaner[row][col] = 0;
+                        nextMutated[row][col] = 0;
                     }
                 } else {
                     // Cell is dead
@@ -600,7 +736,7 @@ class GameOfLife {
                         birthNeighbors.push(2);
                     }
 
-                    if (birthNeighbors.includes(neighbors)) {
+                    if (birthNeighbors.includes(neighbors) && this.resources[row][col] > 0.2) {
                         this.nextGrid[row][col] = 1;
                         this.cellAge[row][col] = 1;
 
@@ -609,6 +745,7 @@ class GameOfLife {
                             nextPlagued[row][col] = 1;
                             nextCleaner[row][col] = 0;
                             nextSuperbreed[row][col] = 0;
+                            nextMutated[row][col] = 0;
                         } else {
                             // Inherit traits from neighbors
                             const plaguedNeighbors = this.countPlaguedNeighbors(row, col);
@@ -619,12 +756,15 @@ class GameOfLife {
                                 nextCleaner[row][col] = 1;
                                 nextPlagued[row][col] = 0;
                                 nextSuperbreed[row][col] = 0;
+                                nextMutated[row][col] = 0;
                             } else if (plaguedNeighbors > 0) {
                                 // Plague spreads to new cells
                                 nextPlagued[row][col] = Math.random() < this.plagueRate ? 1 : 0;
+                                nextMutated[row][col] = 0;
                             } else if (superbreedNeighbors > 0) {
                                 // Superbreed trait can be inherited
                                 nextSuperbreed[row][col] = Math.random() < 0.3 ? 1 : 0;
+                                nextMutated[row][col] = 0;
                             }
                         }
                     } else {
@@ -633,6 +773,7 @@ class GameOfLife {
                         nextPlagued[row][col] = 0;
                         nextSuperbreed[row][col] = 0;
                         nextCleaner[row][col] = 0;
+                        nextMutated[row][col] = 0;
                     }
                 }
             }
@@ -656,6 +797,7 @@ class GameOfLife {
         this.cellPlagued = nextPlagued;
         this.cellSuperbreed = nextSuperbreed;
         this.cellCleaner = nextCleaner;
+        this.cellMutated = nextMutated;
         this.generation++;
         this.updateStats();
     }
@@ -775,6 +917,18 @@ class GameOfLife {
             return superbreedColors[0];
         }
 
+        // Mutated cells are purple/violet (hybrid cells)
+        if (this.cellMutated[row][col] === 1) {
+            const mutatedColors = ['#a855f7', '#9333ea', '#7c3aed', '#6d28d9', '#5b21b6'];
+            if (this.showAging && age > 0) {
+                const maxAge = 20;
+                const normalizedAge = Math.min(age, maxAge) / maxAge;
+                const colorIndex = Math.min(Math.floor(normalizedAge * mutatedColors.length), mutatedColors.length - 1);
+                return mutatedColors[colorIndex];
+            }
+            return mutatedColors[0];
+        }
+
         // Normal cells use theme colors with aging
         if (!this.showAging || age === 0) {
             return this.themeColors[this.currentTheme][0];
@@ -878,6 +1032,24 @@ class GameOfLife {
                         this.ctx.fill();
 
                         this.ctx.shadowBlur = 0;
+                    } else if (this.cellMutated[row][col] === 1) {
+                        // Hexagon for mutated cells
+                        this.ctx.shadowBlur = 12;
+                        this.ctx.shadowColor = color;
+
+                        const size = this.cellSize / 2 - 1;
+                        this.ctx.beginPath();
+                        for (let i = 0; i < 6; i++) {
+                            const angle = (Math.PI / 3) * i;
+                            const px = centerX + size * Math.cos(angle);
+                            const py = centerY + size * Math.sin(angle);
+                            if (i === 0) this.ctx.moveTo(px, py);
+                            else this.ctx.lineTo(px, py);
+                        }
+                        this.ctx.closePath();
+                        this.ctx.fill();
+
+                        this.ctx.shadowBlur = 0;
                     } else {
                         // Square for normal cells
                         this.ctx.shadowBlur = 10;
@@ -889,6 +1061,12 @@ class GameOfLife {
                     }
                 }
             }
+        }
+
+        // Draw particles (visual effects)
+        for (let i = this.particles.length - 1; i >= 0; i--) {
+            const particle = this.particles[i];
+            particle.draw(this.ctx);
         }
 
         // Draw grid lines
@@ -919,9 +1097,13 @@ class GameOfLife {
         let plaguedCount = 0;
         let superbreedCount = 0;
         let cleanerCount = 0;
+        let mutatedCount = 0;
+        let totalResources = 0;
+        let cellCount = this.rows * this.cols;
 
         for (let row = 0; row < this.rows; row++) {
             for (let col = 0; col < this.cols; col++) {
+                totalResources += this.resources[row][col];
                 if (this.grid[row][col] === 1) {
                     population++;
                     if (this.cellPlagued[row][col] === 1) {
@@ -933,16 +1115,91 @@ class GameOfLife {
                     if (this.cellCleaner[row][col] === 1) {
                         cleanerCount++;
                     }
+                    if (this.cellMutated[row][col] === 1) {
+                        mutatedCount++;
+                    }
                 }
             }
         }
+
+        const avgResources = Math.round((totalResources / cellCount) * 100);
 
         document.getElementById('generation').textContent = this.generation;
         document.getElementById('population').textContent = population;
         document.getElementById('plaguedCells').textContent = plaguedCount;
         document.getElementById('superbreedCells').textContent = superbreedCount;
         document.getElementById('cleanerCells').textContent = cleanerCount;
+        document.getElementById('mutatedCells').textContent = mutatedCount;
         document.getElementById('catastropheCount').textContent = this.catastropheCount;
+        document.getElementById('avgResources').textContent = avgResources;
+
+        // Update population history for graph
+        this.populationHistory.push(population);
+        if (this.populationHistory.length > this.maxHistoryLength) {
+            this.populationHistory.shift();
+        }
+
+        // Draw population graph
+        this.drawGraph();
+    }
+
+    drawGraph() {
+        if (!this.graphCtx) return;
+
+        const width = this.graphCanvas.width;
+        const height = this.graphCanvas.height;
+        const padding = 10;
+
+        // Clear graph
+        this.graphCtx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+        this.graphCtx.fillRect(0, 0, width, height);
+
+        if (this.populationHistory.length < 2) return;
+
+        // Find min and max for scaling
+        const maxPop = Math.max(...this.populationHistory, 1);
+        const minPop = Math.min(...this.populationHistory, 0);
+        const range = maxPop - minPop || 1;
+
+        // Draw grid lines
+        this.graphCtx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+        this.graphCtx.lineWidth = 1;
+        for (let i = 0; i < 5; i++) {
+            const y = padding + (height - padding * 2) * (i / 4);
+            this.graphCtx.beginPath();
+            this.graphCtx.moveTo(padding, y);
+            this.graphCtx.lineTo(width - padding, y);
+            this.graphCtx.stroke();
+        }
+
+        // Draw population line
+        this.graphCtx.strokeStyle = getComputedStyle(document.documentElement)
+            .getPropertyValue('--primary-color') || '#00f0ff';
+        this.graphCtx.lineWidth = 2;
+        this.graphCtx.beginPath();
+
+        const dataPoints = this.populationHistory.length;
+        const xStep = (width - padding * 2) / (this.maxHistoryLength - 1);
+
+        for (let i = 0; i < dataPoints; i++) {
+            const x = padding + xStep * i;
+            const normalizedValue = (this.populationHistory[i] - minPop) / range;
+            const y = height - padding - (height - padding * 2) * normalizedValue;
+
+            if (i === 0) {
+                this.graphCtx.moveTo(x, y);
+            } else {
+                this.graphCtx.lineTo(x, y);
+            }
+        }
+
+        this.graphCtx.stroke();
+
+        // Draw current value text
+        this.graphCtx.fillStyle = getComputedStyle(document.documentElement)
+            .getPropertyValue('--primary-color') || '#00f0ff';
+        this.graphCtx.font = '12px monospace';
+        this.graphCtx.fillText(`Max: ${maxPop}`, padding + 5, padding + 12);
     }
 
     animate(currentTime = 0) {
@@ -950,6 +1207,13 @@ class GameOfLife {
 
         // Update animation time for pulsating effects
         this.animationTime = currentTime;
+
+        // Update particles
+        for (let i = this.particles.length - 1; i >= 0; i--) {
+            if (!this.particles[i].update()) {
+                this.particles.splice(i, 1);
+            }
+        }
 
         // Always redraw for pulsating animation
         this.draw();

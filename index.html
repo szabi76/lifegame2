@@ -138,6 +138,25 @@
                             <div class="stat-adv">✨ <span id="cleanerCells">0</span></div>
                             <div class="stat-adv">💥 <span id="catastropheCount">0</span></div>
                         </div>
+                        <div class="slider-group">
+                            <label>Mutation <span id="mutationRateValue">5</span>%</label>
+                            <input type="range" id="mutationRate" min="0" max="20" value="5" class="slider-compact">
+                        </div>
+                        <div class="stats-advanced">
+                            <div class="stat-adv">🧬 <span id="mutatedCells">0</span></div>
+                            <div class="stat-adv">⚡ <span id="avgResources">100</span>%</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Population Graph -->
+                <div class="control-group">
+                    <button class="section-toggle" data-section="graph">
+                        <span>📊 Population</span>
+                        <span class="toggle-icon">▼</span>
+                    </button>
+                    <div id="graph" class="section-content">
+                        <canvas id="populationGraph" width="240" height="120"></canvas>
                     </div>
                 </div>
             </div>
