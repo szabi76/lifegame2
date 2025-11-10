@@ -277,6 +277,28 @@ body {
     transform: translateY(-2px);
 }
 
+.btn-warning {
+    background: linear-gradient(135deg, #ff6b6b, #ee5a6f);
+    color: white;
+    box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
+}
+
+.btn-warning:hover {
+    box-shadow: 0 6px 25px rgba(255, 107, 107, 0.6);
+    transform: translateY(-2px);
+}
+
+.btn-special {
+    background: linear-gradient(135deg, #f9ca24, #f0932b);
+    color: white;
+    box-shadow: 0 4px 15px rgba(249, 202, 36, 0.4);
+}
+
+.btn-special:hover {
+    box-shadow: 0 6px 25px rgba(249, 202, 36, 0.6);
+    transform: translateY(-2px);
+}
+
 .btn-theme, .btn-pattern {
     background: rgba(255, 255, 255, 0.05);
     color: var(--text-primary);
@@ -409,6 +431,29 @@ body {
     color: var(--primary-color);
     font-weight: 600;
     font-size: 1.1em;
+}
+
+.stat-plague {
+    color: #ff6b6b !important;
+}
+
+.stat-superbreed {
+    color: #f9ca24 !important;
+}
+
+.stat-catastrophe {
+    color: #ff4757 !important;
+}
+
+.advanced-features {
+    background: rgba(255, 69, 0, 0.05);
+    border: 1px solid rgba(255, 69, 0, 0.2);
+    border-radius: 10px;
+    padding: 15px;
+}
+
+.advanced-features h3 {
+    color: #ff6b35 !important;
 }
 
 /* Canvas Container */

@@ -9,6 +9,8 @@ class GameOfLife {
         this.rows = 0;
         this.grid = [];
         this.cellAge = []; // Track how long cells have been alive
+        this.cellPlagued = []; // Track plagued cells
+        this.cellSuperbreed = []; // Track superbreed cells
         this.nextGrid = [];
         this.isRunning = false;
         this.generation = 0;
@@ -20,6 +22,14 @@ class GameOfLife {
         this.showAging = true;
         this.showGrid = true;
         this.wrapEdges = true;
+
+        // Advanced Features
+        this.enablePlague = false;
+        this.enableSuperbreed = false;
+        this.enableCatastrophe = false;
+        this.plagueRate = 0.15; // 15% infection chance
+        this.catastropheChance = 0.01; // 1% chance per generation
+        this.catastropheCount = 0;
 
         // Interaction
         this.isDrawing = false;
@@ -58,6 +68,8 @@ class GameOfLife {
         // Initialize grids
         this.grid = this.createEmptyGrid();
         this.cellAge = this.createEmptyGrid();
+        this.cellPlagued = this.createEmptyGrid();
+        this.cellSuperbreed = this.createEmptyGrid();
         this.nextGrid = this.createEmptyGrid();
 
         this.draw();
@@ -121,6 +133,39 @@ class GameOfLife {
 
         document.getElementById('wrapEdges').addEventListener('change', (e) => {
             this.wrapEdges = e.target.checked;
+        });
+
+        // Advanced Features
+        document.getElementById('enablePlague').addEventListener('change', (e) => {
+            this.enablePlague = e.target.checked;
+        });
+
+        document.getElementById('enableSuperbreed').addEventListener('change', (e) => {
+            this.enableSuperbreed = e.target.checked;
+        });
+
+        document.getElementById('enableCatastrophe').addEventListener('change', (e) => {
+            this.enableCatastrophe = e.target.checked;
+        });
+
+        document.getElementById('triggerPlague').addEventListener('click', () => {
+            this.triggerPlague();
+        });
+
+        document.getElementById('triggerSuperbreed').addEventListener('click', () => {
+            this.triggerSuperbreed();
+        });
+
+        const plagueRateSlider = document.getElementById('plagueRate');
+        plagueRateSlider.addEventListener('input', (e) => {
+            this.plagueRate = parseInt(e.target.value) / 100;
+            document.getElementById('plagueRateValue').textContent = e.target.value;
+        });
+
+        const catastropheChanceSlider = document.getElementById('catastropheChance');
+        catastropheChanceSlider.addEventListener('input', (e) => {
+            this.catastropheChance = parseInt(e.target.value) / 100;
+            document.getElementById('catastropheChanceValue').textContent = e.target.value;
         });
 
         // Theme buttons
@@ -212,6 +257,8 @@ class GameOfLife {
                 } else {
                     this.cellAge[row][col] = 0;
                 }
+                this.cellPlagued[row][col] = 0;
+                this.cellSuperbreed[row][col] = 0;
                 this.lastCell = cellKey;
                 this.draw();
                 this.updateStats();
@@ -230,7 +277,10 @@ class GameOfLife {
     clear() {
         this.grid = this.createEmptyGrid();
         this.cellAge = this.createEmptyGrid();
+        this.cellPlagued = this.createEmptyGrid();
+        this.cellSuperbreed = this.createEmptyGrid();
         this.generation = 0;
+        this.catastropheCount = 0;
         this.draw();
         this.updateStats();
     }
@@ -240,11 +290,69 @@ class GameOfLife {
             for (let col = 0; col < this.cols; col++) {
                 this.grid[row][col] = Math.random() > 0.7 ? 1 : 0;
                 this.cellAge[row][col] = this.grid[row][col] ? 1 : 0;
+                this.cellPlagued[row][col] = 0;
+                this.cellSuperbreed[row][col] = 0;
             }
         }
         this.generation = 0;
+        this.catastropheCount = 0;
         this.draw();
         this.updateStats();
+    }
+
+    triggerPlague() {
+        // Infect random cells
+        let infectedCount = 0;
+        for (let row = 0; row < this.rows; row++) {
+            for (let col = 0; col < this.cols; col++) {
+                if (this.grid[row][col] === 1 && Math.random() < 0.1) {
+                    this.cellPlagued[row][col] = 1;
+                    this.cellSuperbreed[row][col] = 0;
+                    infectedCount++;
+                }
+            }
+        }
+        this.draw();
+        this.updateStats();
+    }
+
+    triggerSuperbreed() {
+        // Enhance random cells
+        let enhancedCount = 0;
+        for (let row = 0; row < this.rows; row++) {
+            for (let col = 0; col < this.cols; col++) {
+                if (this.grid[row][col] === 1 && Math.random() < 0.1) {
+                    this.cellSuperbreed[row][col] = 1;
+                    this.cellPlagued[row][col] = 0;
+                    enhancedCount++;
+                }
+            }
+        }
+        this.draw();
+        this.updateStats();
+    }
+
+    triggerCatastrophe() {
+        // Random catastrophe - kill cells in a random area
+        const centerRow = Math.floor(Math.random() * this.rows);
+        const centerCol = Math.floor(Math.random() * this.cols);
+        const radius = Math.floor(Math.random() * 10) + 5; // Radius 5-15
+
+        for (let row = 0; row < this.rows; row++) {
+            for (let col = 0; col < this.cols; col++) {
+                const distance = Math.sqrt(
+                    Math.pow(row - centerRow, 2) + Math.pow(col - centerCol, 2)
+                );
+                if (distance <= radius) {
+                    this.grid[row][col] = 0;
+                    this.cellAge[row][col] = 0;
+                    this.cellPlagued[row][col] = 0;
+                    this.cellSuperbreed[row][col] = 0;
+                }
+            }
+        }
+
+        this.catastropheCount++;
     }
 
     setTheme(theme) {
@@ -356,30 +464,103 @@ class GameOfLife {
     }
 
     nextGeneration() {
+        // Trigger catastrophe if enabled
+        if (this.enableCatastrophe && Math.random() < this.catastropheChance) {
+            this.triggerCatastrophe();
+        }
+
+        // Create temporary arrays for next generation states
+        const nextPlagued = this.createEmptyGrid();
+        const nextSuperbreed = this.createEmptyGrid();
+
         // Create next generation
         for (let row = 0; row < this.rows; row++) {
             for (let col = 0; col < this.cols; col++) {
                 const neighbors = this.countNeighbors(row, col);
                 const currentState = this.grid[row][col];
+                const isPlagued = this.cellPlagued[row][col] === 1;
+                const isSuperbreed = this.cellSuperbreed[row][col] === 1;
 
-                // Conway's rules
+                // Modified Conway's rules with advanced features
                 if (currentState === 1) {
                     // Cell is alive
-                    if (neighbors === 2 || neighbors === 3) {
+                    let surviveNeighbors = [2, 3];
+
+                    // Superbreed cells survive with less neighbors
+                    if (isSuperbreed) {
+                        surviveNeighbors = [1, 2, 3, 4];
+                    }
+
+                    if (surviveNeighbors.includes(neighbors)) {
                         this.nextGrid[row][col] = 1;
                         this.cellAge[row][col]++;
+
+                        // Copy plague/superbreed state
+                        nextPlagued[row][col] = isPlagued ? 1 : 0;
+                        nextSuperbreed[row][col] = isSuperbreed ? 1 : 0;
+
+                        // Plague kills cells after some time
+                        if (isPlagued && this.enablePlague) {
+                            if (this.cellAge[row][col] > 5 && Math.random() < 0.3) {
+                                this.nextGrid[row][col] = 0;
+                                this.cellAge[row][col] = 0;
+                                nextPlagued[row][col] = 0;
+                            }
+                        }
                     } else {
                         this.nextGrid[row][col] = 0;
                         this.cellAge[row][col] = 0;
+                        nextPlagued[row][col] = 0;
+                        nextSuperbreed[row][col] = 0;
                     }
                 } else {
                     // Cell is dead
-                    if (neighbors === 3) {
+                    let birthNeighbors = [3];
+
+                    // Count superbreed neighbors
+                    const superbreedNeighbors = this.countSuperbreedNeighbors(row, col);
+
+                    // Superbreed neighbors can birth with 2 neighbors
+                    if (superbreedNeighbors > 0 && neighbors === 2) {
+                        birthNeighbors.push(2);
+                    }
+
+                    if (birthNeighbors.includes(neighbors)) {
                         this.nextGrid[row][col] = 1;
                         this.cellAge[row][col] = 1;
+
+                        // Inherit traits from neighbors
+                        const plaguedNeighbors = this.countPlaguedNeighbors(row, col);
+
+                        if (this.enablePlague && plaguedNeighbors > 0) {
+                            // Plague spreads to new cells
+                            nextPlagued[row][col] = Math.random() < this.plagueRate ? 1 : 0;
+                        }
+
+                        if (this.enableSuperbreed && superbreedNeighbors > 0) {
+                            // Superbreed trait can be inherited
+                            nextSuperbreed[row][col] = Math.random() < 0.3 ? 1 : 0;
+                        }
                     } else {
                         this.nextGrid[row][col] = 0;
                         this.cellAge[row][col] = 0;
+                        nextPlagued[row][col] = 0;
+                        nextSuperbreed[row][col] = 0;
+                    }
+                }
+            }
+        }
+
+        // Spread plague to neighboring living cells
+        if (this.enablePlague) {
+            for (let row = 0; row < this.rows; row++) {
+                for (let col = 0; col < this.cols; col++) {
+                    if (this.nextGrid[row][col] === 1 && nextPlagued[row][col] === 0) {
+                        const plaguedNeighbors = this.countPlaguedNeighbors(row, col);
+                        if (plaguedNeighbors > 0 && Math.random() < this.plagueRate) {
+                            nextPlagued[row][col] = 1;
+                            nextSuperbreed[row][col] = 0; // Plague overrides superbreed
+                        }
                     }
                 }
             }
@@ -387,11 +568,90 @@ class GameOfLife {
 
         // Swap grids
         [this.grid, this.nextGrid] = [this.nextGrid, this.grid];
+        this.cellPlagued = nextPlagued;
+        this.cellSuperbreed = nextSuperbreed;
         this.generation++;
         this.updateStats();
     }
 
-    getCellColor(age) {
+    countPlaguedNeighbors(row, col) {
+        let count = 0;
+        for (let i = -1; i <= 1; i++) {
+            for (let j = -1; j <= 1; j++) {
+                if (i === 0 && j === 0) continue;
+
+                let newRow = row + i;
+                let newCol = col + j;
+
+                if (this.wrapEdges) {
+                    newRow = (newRow + this.rows) % this.rows;
+                    newCol = (newCol + this.cols) % this.cols;
+                } else {
+                    if (newRow < 0 || newRow >= this.rows || newCol < 0 || newCol >= this.cols) {
+                        continue;
+                    }
+                }
+
+                if (this.grid[newRow][newCol] === 1 && this.cellPlagued[newRow][newCol] === 1) {
+                    count++;
+                }
+            }
+        }
+        return count;
+    }
+
+    countSuperbreedNeighbors(row, col) {
+        let count = 0;
+        for (let i = -1; i <= 1; i++) {
+            for (let j = -1; j <= 1; j++) {
+                if (i === 0 && j === 0) continue;
+
+                let newRow = row + i;
+                let newCol = col + j;
+
+                if (this.wrapEdges) {
+                    newRow = (newRow + this.rows) % this.rows;
+                    newCol = (newCol + this.cols) % this.cols;
+                } else {
+                    if (newRow < 0 || newRow >= this.rows || newCol < 0 || newCol >= this.cols) {
+                        continue;
+                    }
+                }
+
+                if (this.grid[newRow][newCol] === 1 && this.cellSuperbreed[newRow][newCol] === 1) {
+                    count++;
+                }
+            }
+        }
+        return count;
+    }
+
+    getCellColor(row, col, age) {
+        // Plague cells are red/dark red
+        if (this.cellPlagued[row][col] === 1) {
+            const plagueColors = ['#ff6b6b', '#ee5a6f', '#e74c3c', '#c0392b', '#a93226'];
+            if (this.showAging && age > 0) {
+                const maxAge = 20;
+                const normalizedAge = Math.min(age, maxAge) / maxAge;
+                const colorIndex = Math.min(Math.floor(normalizedAge * plagueColors.length), plagueColors.length - 1);
+                return plagueColors[colorIndex];
+            }
+            return plagueColors[0];
+        }
+
+        // Superbreed cells are gold/yellow
+        if (this.cellSuperbreed[row][col] === 1) {
+            const superbreedColors = ['#f9ca24', '#f0932b', '#ff9f43', '#ffa502', '#ff6348'];
+            if (this.showAging && age > 0) {
+                const maxAge = 20;
+                const normalizedAge = Math.min(age, maxAge) / maxAge;
+                const colorIndex = Math.min(Math.floor(normalizedAge * superbreedColors.length), superbreedColors.length - 1);
+                return superbreedColors[colorIndex];
+            }
+            return superbreedColors[0];
+        }
+
+        // Normal cells use theme colors with aging
         if (!this.showAging || age === 0) {
             return this.themeColors[this.currentTheme][0];
         }
@@ -417,11 +677,11 @@ class GameOfLife {
                     const y = row * this.cellSize;
                     const age = this.cellAge[row][col];
 
-                    this.ctx.fillStyle = this.getCellColor(age);
+                    this.ctx.fillStyle = this.getCellColor(row, col, age);
 
                     // Add glow effect
                     this.ctx.shadowBlur = 10;
-                    this.ctx.shadowColor = this.getCellColor(age);
+                    this.ctx.shadowColor = this.getCellColor(row, col, age);
 
                     this.ctx.fillRect(x + 1, y + 1, this.cellSize - 2, this.cellSize - 2);
 
@@ -453,16 +713,30 @@ class GameOfLife {
     }
 
     updateStats() {
-        // Count population
+        // Count population and cell types
         let population = 0;
+        let plaguedCount = 0;
+        let superbreedCount = 0;
+
         for (let row = 0; row < this.rows; row++) {
             for (let col = 0; col < this.cols; col++) {
-                population += this.grid[row][col];
+                if (this.grid[row][col] === 1) {
+                    population++;
+                    if (this.cellPlagued[row][col] === 1) {
+                        plaguedCount++;
+                    }
+                    if (this.cellSuperbreed[row][col] === 1) {
+                        superbreedCount++;
+                    }
+                }
             }
         }
 
         document.getElementById('generation').textContent = this.generation;
         document.getElementById('population').textContent = population;
+        document.getElementById('plaguedCells').textContent = plaguedCount;
+        document.getElementById('superbreedCells').textContent = superbreedCount;
+        document.getElementById('catastropheCount').textContent = this.catastropheCount;
     }
 
     animate(currentTime = 0) {
