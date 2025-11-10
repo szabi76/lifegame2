@@ -357,6 +357,35 @@ body {
     accent-color: var(--primary-color);
 }
 
+/* Select Dropdown */
+.select-compact {
+    width: 100%;
+    padding: 6px 10px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    color: var(--text-primary);
+    font-size: 0.85em;
+    cursor: pointer;
+    outline: none;
+    transition: all 0.2s ease;
+}
+
+.select-compact:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: var(--primary-color);
+}
+
+.select-compact:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 8px rgba(0, 240, 255, 0.3);
+}
+
+.select-compact option {
+    background: var(--bg-sidebar);
+    color: var(--text-primary);
+}
+
 .checkbox-compact:hover {
     color: var(--text-primary);
 }

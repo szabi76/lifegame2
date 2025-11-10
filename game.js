@@ -99,6 +99,27 @@ class GameOfLife {
         this.animationTime = 0; // For pulsating animations
         this.mutationRate = 0.05; // 5% mutation chance
 
+        // Reaction-Diffusion System (Gray-Scott)
+        this.rdEnabled = false;
+        this.rdGridA = []; // Chemical A (nutrients)
+        this.rdGridB = []; // Chemical B (toxins)
+        this.rdOpacity = 0.5;
+        this.feedRate = 0.055;
+        this.killRate = 0.062;
+        this.diffusionA = 1.0;
+        this.diffusionB = 0.5;
+        this.rdUpdateCounter = 0;
+        this.rdUpdateFrequency = 2; // Update RD every N frames for performance
+
+        // RD Presets (f, k, Da, Db)
+        this.rdPresets = {
+            coral: { f: 0.0545, k: 0.062, dA: 1.0, dB: 0.5 },
+            mitosis: { f: 0.0367, k: 0.0649, dA: 1.0, dB: 0.5 },
+            waves: { f: 0.014, k: 0.054, dA: 1.0, dB: 0.5 },
+            maze: { f: 0.029, k: 0.057, dA: 1.0, dB: 0.5 },
+            fingerprint: { f: 0.055, k: 0.062, dA: 1.0, dB: 0.5 }
+        };
+
         // Population history for graph (store last 100 generations)
         this.populationHistory = {
             total: [],
@@ -156,6 +177,9 @@ class GameOfLife {
         this.resources = this.createResourceGrid();
         this.nextGrid = this.createEmptyGrid();
 
+        // Initialize RD grids
+        this.initRDGrids();
+
         this.draw();
         this.updateStats();
     }
@@ -167,6 +191,177 @@ class GameOfLife {
     createResourceGrid() {
         // Initialize resources at 100% (value 1.0)
         return Array(this.rows).fill(null).map(() => Array(this.cols).fill(1.0));
+    }
+
+    // Reaction-Diffusion Methods
+    initRDGrids() {
+        // Initialize chemical A (nutrients) with random perturbations
+        this.rdGridA = Array(this.rows).fill(null).map(() =>
+            Array(this.cols).fill(null).map(() => 1.0)
+        );
+
+        // Initialize chemical B (toxins) with small random seeds
+        this.rdGridB = Array(this.rows).fill(null).map(() =>
+            Array(this.cols).fill(null).map(() => 0.0)
+        );
+
+        // Add random seed patterns for B
+        const numSeeds = Math.floor((this.rows * this.cols) / 100);
+        for (let i = 0; i < numSeeds; i++) {
+            const row = Math.floor(Math.random() * this.rows);
+            const col = Math.floor(Math.random() * this.cols);
+            const radius = 2;
+
+            for (let dr = -radius; dr <= radius; dr++) {
+                for (let dc = -radius; dc <= radius; dc++) {
+                    const r = row + dr;
+                    const c = col + dc;
+                    if (r >= 0 && r < this.rows && c >= 0 && c < this.cols) {
+                        this.rdGridB[r][c] = 1.0;
+                        this.rdGridA[r][c] = 0.0;
+                    }
+                }
+            }
+        }
+    }
+
+    resetRD() {
+        this.initRDGrids();
+    }
+
+    applyRDPreset(presetName) {
+        const preset = this.rdPresets[presetName];
+        if (preset) {
+            this.feedRate = preset.f;
+            this.killRate = preset.k;
+            this.diffusionA = preset.dA;
+            this.diffusionB = preset.dB;
+
+            // Update UI
+            document.getElementById('feedRate').value = Math.round(preset.f * 1000);
+            document.getElementById('killRate').value = Math.round(preset.k * 1000);
+            document.getElementById('diffusionA').value = Math.round(preset.dA * 100);
+            document.getElementById('diffusionB').value = Math.round(preset.dB * 100);
+
+            document.getElementById('feedRateValue').textContent = preset.f.toFixed(3);
+            document.getElementById('killRateValue').textContent = preset.k.toFixed(3);
+            document.getElementById('diffusionAValue').textContent = preset.dA.toFixed(1);
+            document.getElementById('diffusionBValue').textContent = preset.dB.toFixed(1);
+
+            this.resetRD();
+        }
+    }
+
+    updateRD() {
+        if (!this.rdEnabled) return;
+
+        // Performance optimization - update at lower frequency
+        this.rdUpdateCounter++;
+        if (this.rdUpdateCounter < this.rdUpdateFrequency) return;
+        this.rdUpdateCounter = 0;
+
+        const nextA = Array(this.rows).fill(null).map(() => Array(this.cols).fill(0));
+        const nextB = Array(this.rows).fill(null).map(() => Array(this.cols).fill(0));
+
+        // Gray-Scott reaction-diffusion equations
+        for (let row = 0; row < this.rows; row++) {
+            for (let col = 0; col < this.cols; col++) {
+                const a = this.rdGridA[row][col];
+                const b = this.rdGridB[row][col];
+
+                // Compute Laplacian (diffusion) using 9-point stencil
+                let laplaceA = 0;
+                let laplaceB = 0;
+
+                // 9-point weighted stencil for better diffusion
+                const weights = [
+                    [0.05, 0.2, 0.05],
+                    [0.2, -1.0, 0.2],
+                    [0.05, 0.2, 0.05]
+                ];
+
+                for (let dr = -1; dr <= 1; dr++) {
+                    for (let dc = -1; dc <= 1; dc++) {
+                        let r = row + dr;
+                        let c = col + dc;
+
+                        // Wrap edges for toroidal topology
+                        if (this.wrapEdges) {
+                            r = (r + this.rows) % this.rows;
+                            c = (c + this.cols) % this.cols;
+                        } else {
+                            if (r < 0 || r >= this.rows || c < 0 || c >= this.cols) continue;
+                        }
+
+                        const weight = weights[dr + 1][dc + 1];
+                        laplaceA += this.rdGridA[r][c] * weight;
+                        laplaceB += this.rdGridB[r][c] * weight;
+                    }
+                }
+
+                // Gray-Scott equations
+                // dA/dt = Da * ∇²A - AB² + f(1-A)
+                // dB/dt = Db * ∇²B + AB² - (k+f)B
+                const reaction = a * b * b;
+                const dA = this.diffusionA * laplaceA - reaction + this.feedRate * (1 - a);
+                const dB = this.diffusionB * laplaceB + reaction - (this.killRate + this.feedRate) * b;
+
+                // Update with time step (dt = 1.0 for stability)
+                nextA[row][col] = Math.max(0, Math.min(1, a + dA));
+                nextB[row][col] = Math.max(0, Math.min(1, b + dB));
+
+                // Link to resource system: chemical A increases resources, B decreases
+                if (this.rdEnabled) {
+                    const resourceDelta = (nextA[row][col] - nextB[row][col]) * 0.002;
+                    this.resources[row][col] = Math.max(0, Math.min(1,
+                        this.resources[row][col] + resourceDelta
+                    ));
+                }
+            }
+        }
+
+        // Cell influence on RD: living cells consume A and produce B
+        for (let row = 0; row < this.rows; row++) {
+            for (let col = 0; col < this.cols; col++) {
+                if (this.grid[row][col] === 1) {
+                    nextA[row][col] = Math.max(0, nextA[row][col] - 0.05);
+                    nextB[row][col] = Math.min(1, nextB[row][col] + 0.03);
+                }
+            }
+        }
+
+        this.rdGridA = nextA;
+        this.rdGridB = nextB;
+    }
+
+    renderRD() {
+        if (!this.rdEnabled || this.rdOpacity <= 0) return;
+
+        this.ctx.save();
+        this.ctx.globalAlpha = this.rdOpacity;
+
+        for (let row = 0; row < this.rows; row++) {
+            for (let col = 0; col < this.cols; col++) {
+                const a = this.rdGridA[row][col];
+                const b = this.rdGridB[row][col];
+
+                // Color mapping: B chemical creates colorful patterns
+                const intensity = b;
+                const hue = (a * 180 + b * 180) % 360;
+                const sat = 70 + b * 30;
+                const light = 30 + intensity * 40;
+
+                this.ctx.fillStyle = `hsl(${hue}, ${sat}%, ${light}%)`;
+                this.ctx.fillRect(
+                    col * this.cellSize,
+                    row * this.cellSize,
+                    this.cellSize,
+                    this.cellSize
+                );
+            }
+        }
+
+        this.ctx.restore();
     }
 
     setupEventListeners() {
@@ -263,6 +458,52 @@ class GameOfLife {
         mutationRateSlider.addEventListener('input', (e) => {
             this.mutationRate = parseInt(e.target.value) / 100;
             document.getElementById('mutationRateValue').textContent = e.target.value;
+        });
+
+        // Reaction-Diffusion Controls
+        document.getElementById('enableRD').addEventListener('change', (e) => {
+            this.rdEnabled = e.target.checked;
+            this.draw();
+        });
+
+        document.getElementById('rdPreset').addEventListener('change', (e) => {
+            this.applyRDPreset(e.target.value);
+        });
+
+        const rdOpacitySlider = document.getElementById('rdOpacity');
+        rdOpacitySlider.addEventListener('input', (e) => {
+            this.rdOpacity = parseInt(e.target.value) / 100;
+            document.getElementById('rdOpacityValue').textContent = e.target.value;
+            this.draw();
+        });
+
+        const feedRateSlider = document.getElementById('feedRate');
+        feedRateSlider.addEventListener('input', (e) => {
+            this.feedRate = parseInt(e.target.value) / 1000;
+            document.getElementById('feedRateValue').textContent = this.feedRate.toFixed(3);
+        });
+
+        const killRateSlider = document.getElementById('killRate');
+        killRateSlider.addEventListener('input', (e) => {
+            this.killRate = parseInt(e.target.value) / 1000;
+            document.getElementById('killRateValue').textContent = this.killRate.toFixed(3);
+        });
+
+        const diffusionASlider = document.getElementById('diffusionA');
+        diffusionASlider.addEventListener('input', (e) => {
+            this.diffusionA = parseInt(e.target.value) / 100;
+            document.getElementById('diffusionAValue').textContent = this.diffusionA.toFixed(1);
+        });
+
+        const diffusionBSlider = document.getElementById('diffusionB');
+        diffusionBSlider.addEventListener('input', (e) => {
+            this.diffusionB = parseInt(e.target.value) / 100;
+            document.getElementById('diffusionBValue').textContent = this.diffusionB.toFixed(1);
+        });
+
+        document.getElementById('resetRD').addEventListener('click', () => {
+            this.resetRD();
+            this.draw();
         });
 
         // Collapsible sections
@@ -664,6 +905,9 @@ class GameOfLife {
             }
         }
 
+        // Update reaction-diffusion system
+        this.updateRD();
+
         // Create temporary arrays for next generation states
         const nextPlagued = this.createEmptyGrid();
         const nextSuperbreed = this.createEmptyGrid();
@@ -969,6 +1213,9 @@ class GameOfLife {
         // Clear canvas
         this.ctx.fillStyle = '#000';
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+
+        // Render reaction-diffusion as background layer
+        this.renderRD();
 
         // Draw chaos markers (intense neon glow effects)
         for (let row = 0; row < this.rows; row++) {

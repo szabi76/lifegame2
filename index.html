@@ -171,6 +171,53 @@
                     </div>
                 </div>
 
+                <!-- Reaction-Diffusion Chemistry -->
+                <div class="control-group">
+                    <button class="section-toggle" data-section="chemistry">
+                        <span>🧪 Chemistry</span>
+                        <span class="toggle-icon">▼</span>
+                    </button>
+                    <div id="chemistry" class="section-content">
+                        <div class="checkbox-row">
+                            <label class="checkbox-compact">
+                                <input type="checkbox" id="enableRD">
+                                <span>Enable RD</span>
+                            </label>
+                        </div>
+                        <div class="slider-group">
+                            <label>Preset</label>
+                            <select id="rdPreset" class="select-compact">
+                                <option value="coral">Coral</option>
+                                <option value="mitosis">Mitosis</option>
+                                <option value="waves">Waves</option>
+                                <option value="maze">Maze</option>
+                                <option value="fingerprint">Fingerprint</option>
+                            </select>
+                        </div>
+                        <div class="slider-group">
+                            <label>Opacity <span id="rdOpacityValue">50</span>%</label>
+                            <input type="range" id="rdOpacity" min="0" max="100" value="50" class="slider-compact">
+                        </div>
+                        <div class="slider-group">
+                            <label>Feed (f) <span id="feedRateValue">0.055</span></label>
+                            <input type="range" id="feedRate" min="10" max="80" value="55" class="slider-compact">
+                        </div>
+                        <div class="slider-group">
+                            <label>Kill (k) <span id="killRateValue">0.062</span></label>
+                            <input type="range" id="killRate" min="40" max="70" value="62" class="slider-compact">
+                        </div>
+                        <div class="slider-group">
+                            <label>Diffusion A <span id="diffusionAValue">1.0</span></label>
+                            <input type="range" id="diffusionA" min="80" max="120" value="100" class="slider-compact">
+                        </div>
+                        <div class="slider-group">
+                            <label>Diffusion B <span id="diffusionBValue">0.5</span></label>
+                            <input type="range" id="diffusionB" min="40" max="60" value="50" class="slider-compact">
+                        </div>
+                        <button id="resetRD" class="btn btn-secondary btn-block">Reset Chemistry</button>
+                    </div>
+                </div>
+
                 <!-- Help Button -->
                 <div class="control-group">
                     <button id="openHelp" class="btn btn-help">📖 Game Guide</button>
