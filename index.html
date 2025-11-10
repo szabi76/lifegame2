@@ -112,45 +112,25 @@
                         <span class="toggle-icon">▼</span>
                     </button>
                     <div id="advanced" class="section-content">
-                        <div class="checkbox-row">
-                            <label class="checkbox-compact">
-                                <input type="checkbox" id="enablePlague">
-                                <span>🦠 Plague</span>
-                            </label>
-                            <label class="checkbox-compact">
-                                <input type="checkbox" id="enableSuperbreed">
-                                <span>⭐ Super</span>
-                            </label>
-                        </div>
-                        <div class="checkbox-row">
-                            <label class="checkbox-compact">
-                                <input type="checkbox" id="enableCatastrophe">
-                                <span>💥 Chaos</span>
-                            </label>
-                            <label class="checkbox-compact">
-                                <input type="checkbox" id="enableCleaner">
-                                <span>✨ Cleaner</span>
-                            </label>
+                        <div class="button-group-inline">
+                            <button id="triggerPlague" class="btn-compact btn-plague">🦠 Infect</button>
+                            <button id="triggerSuperbreed" class="btn-compact btn-super">⭐ Enhance</button>
                         </div>
                         <div class="button-group-inline">
-                            <button id="triggerPlague" class="btn-compact btn-plague">Infect</button>
-                            <button id="triggerSuperbreed" class="btn-compact btn-super">Enhance</button>
-                        </div>
-                        <div class="button-group-inline">
-                            <button id="triggerCleaner" class="btn-compact btn-cleaner">Deploy</button>
-                            <button id="triggerChaos" class="btn-compact btn-chaos">Destroy</button>
+                            <button id="triggerCleaner" class="btn-compact btn-cleaner">✨ Deploy</button>
+                            <button id="triggerChaos" class="btn-compact btn-chaos">💥 Destroy</button>
                         </div>
                         <div class="slider-group">
-                            <label>Plague <span id="plagueRateValue">15</span>%</label>
-                            <input type="range" id="plagueRate" min="5" max="50" value="15" class="slider-compact">
+                            <label>Plague <span id="plagueRateValue">25</span>%</label>
+                            <input type="range" id="plagueRate" min="10" max="60" value="25" class="slider-compact">
                         </div>
                         <div class="slider-group">
-                            <label>Cleaner <span id="cleanerRateValue">20</span>%</label>
-                            <input type="range" id="cleanerRate" min="5" max="50" value="20" class="slider-compact">
+                            <label>Cleaner <span id="cleanerRateValue">30</span>%</label>
+                            <input type="range" id="cleanerRate" min="10" max="60" value="30" class="slider-compact">
                         </div>
                         <div class="slider-group">
-                            <label>Disaster <span id="catastropheChanceValue">1</span>%</label>
-                            <input type="range" id="catastropheChance" min="1" max="10" value="1" class="slider-compact">
+                            <label>Impact <span id="catastropheImpactValue">15</span></label>
+                            <input type="range" id="catastropheImpact" min="5" max="30" value="15" class="slider-compact">
                         </div>
                         <div class="stats-advanced">
                             <div class="stat-adv">🦠 <span id="plaguedCells">0</span></div>

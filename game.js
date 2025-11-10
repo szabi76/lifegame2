@@ -26,13 +26,9 @@ class GameOfLife {
         this.wrapEdges = true;
 
         // Advanced Features
-        this.enablePlague = false;
-        this.enableSuperbreed = false;
-        this.enableCatastrophe = false;
-        this.enableCleaner = false;
-        this.plagueRate = 0.15; // 15% infection chance
-        this.cleanerRate = 0.20; // 20% cleaning chance
-        this.catastropheChance = 0.01; // 1% chance per generation
+        this.plagueRate = 0.25; // 25% infection chance
+        this.cleanerRate = 0.30; // 30% cleaning chance
+        this.catastropheImpact = 15; // Initial impact zone intensity
         this.catastropheCount = 0;
         this.animationTime = 0; // For pulsating animations
 
@@ -143,23 +139,7 @@ class GameOfLife {
             this.wrapEdges = e.target.checked;
         });
 
-        // Advanced Features
-        document.getElementById('enablePlague').addEventListener('change', (e) => {
-            this.enablePlague = e.target.checked;
-        });
-
-        document.getElementById('enableSuperbreed').addEventListener('change', (e) => {
-            this.enableSuperbreed = e.target.checked;
-        });
-
-        document.getElementById('enableCatastrophe').addEventListener('change', (e) => {
-            this.enableCatastrophe = e.target.checked;
-        });
-
-        document.getElementById('enableCleaner').addEventListener('change', (e) => {
-            this.enableCleaner = e.target.checked;
-        });
-
+        // Advanced Feature Buttons
         document.getElementById('triggerPlague').addEventListener('click', () => {
             this.triggerPlague();
         });
@@ -188,10 +168,10 @@ class GameOfLife {
             document.getElementById('cleanerRateValue').textContent = e.target.value;
         });
 
-        const catastropheChanceSlider = document.getElementById('catastropheChance');
-        catastropheChanceSlider.addEventListener('input', (e) => {
-            this.catastropheChance = parseInt(e.target.value) / 100;
-            document.getElementById('catastropheChanceValue').textContent = e.target.value;
+        const catastropheImpactSlider = document.getElementById('catastropheImpact');
+        catastropheImpactSlider.addEventListener('input', (e) => {
+            this.catastropheImpact = parseInt(e.target.value);
+            document.getElementById('catastropheImpactValue').textContent = e.target.value;
         });
 
         // Collapsible sections
@@ -350,13 +330,14 @@ class GameOfLife {
     }
 
     triggerPlague() {
-        // Infect random cells
+        // Infect 25% of living cells - more visible impact
         let infectedCount = 0;
         for (let row = 0; row < this.rows; row++) {
             for (let col = 0; col < this.cols; col++) {
-                if (this.grid[row][col] === 1 && Math.random() < 0.1) {
+                if (this.grid[row][col] === 1 && Math.random() < 0.25) {
                     this.cellPlagued[row][col] = 1;
                     this.cellSuperbreed[row][col] = 0;
+                    this.cellCleaner[row][col] = 0;
                     infectedCount++;
                 }
             }
@@ -366,13 +347,14 @@ class GameOfLife {
     }
 
     triggerSuperbreed() {
-        // Enhance random cells
+        // Enhance 20% of living cells - more visible impact
         let enhancedCount = 0;
         for (let row = 0; row < this.rows; row++) {
             for (let col = 0; col < this.cols; col++) {
-                if (this.grid[row][col] === 1 && Math.random() < 0.1) {
+                if (this.grid[row][col] === 1 && Math.random() < 0.20) {
                     this.cellSuperbreed[row][col] = 1;
                     this.cellPlagued[row][col] = 0;
+                    this.cellCleaner[row][col] = 0;
                     enhancedCount++;
                 }
             }
@@ -382,11 +364,11 @@ class GameOfLife {
     }
 
     triggerCleaner() {
-        // Deploy cleaner cells
+        // Deploy cleaners to 15% of living cells - more visible impact
         let deployedCount = 0;
         for (let row = 0; row < this.rows; row++) {
             for (let col = 0; col < this.cols; col++) {
-                if (this.grid[row][col] === 1 && Math.random() < 0.1) {
+                if (this.grid[row][col] === 1 && Math.random() < 0.15) {
                     this.cellCleaner[row][col] = 1;
                     this.cellPlagued[row][col] = 0;
                     this.cellSuperbreed[row][col] = 0;
@@ -399,10 +381,10 @@ class GameOfLife {
     }
 
     triggerCatastrophe() {
-        // Random catastrophe - kill cells in a random area
+        // Random catastrophe - kill cells and create infection zone
         const centerRow = Math.floor(Math.random() * this.rows);
         const centerCol = Math.floor(Math.random() * this.cols);
-        const radius = Math.floor(Math.random() * 10) + 5; // Radius 5-15
+        const radius = Math.floor(Math.random() * 10) + 10; // Radius 10-20 for bigger impact
 
         for (let row = 0; row < this.rows; row++) {
             for (let col = 0; col < this.cols; col++) {
@@ -410,12 +392,16 @@ class GameOfLife {
                     Math.pow(row - centerRow, 2) + Math.pow(col - centerCol, 2)
                 );
                 if (distance <= radius) {
+                    // Kill all cells in impact zone
                     this.grid[row][col] = 0;
                     this.cellAge[row][col] = 0;
                     this.cellPlagued[row][col] = 0;
                     this.cellSuperbreed[row][col] = 0;
                     this.cellCleaner[row][col] = 0;
-                    this.chaosMarkers[row][col] = 10; // Mark for glow effect (decays over time)
+
+                    // Set chaos marker intensity based on distance from center
+                    const intensity = Math.max(0, this.catastropheImpact * (1 - distance / radius));
+                    this.chaosMarkers[row][col] = Math.floor(intensity);
                 }
             }
         }
@@ -532,16 +518,14 @@ class GameOfLife {
     }
 
     nextGeneration() {
-        // Trigger catastrophe if enabled
-        if (this.enableCatastrophe && Math.random() < this.catastropheChance) {
-            this.triggerCatastrophe();
-        }
-
-        // Decay chaos markers
+        // Decay chaos markers slowly
         for (let row = 0; row < this.rows; row++) {
             for (let col = 0; col < this.cols; col++) {
                 if (this.chaosMarkers[row][col] > 0) {
-                    this.chaosMarkers[row][col]--;
+                    this.chaosMarkers[row][col] -= 0.5; // Slower decay for longer effect
+                    if (this.chaosMarkers[row][col] < 0) {
+                        this.chaosMarkers[row][col] = 0;
+                    }
                 }
             }
         }
@@ -577,7 +561,7 @@ class GameOfLife {
                         // Cleaner cells clean neighbors
                         const cleanerNeighbors = this.countCleanerNeighbors(row, col);
 
-                        if (isCleaner || (this.enableCleaner && cleanerNeighbors > 0)) {
+                        if (isCleaner || cleanerNeighbors > 0) {
                             // Cleaner restores order
                             nextCleaner[row][col] = 1;
                             nextPlagued[row][col] = 0;
@@ -590,8 +574,8 @@ class GameOfLife {
                         }
 
                         // Plague kills cells after some time
-                        if (isPlagued && this.enablePlague) {
-                            if (this.cellAge[row][col] > 5 && Math.random() < 0.3) {
+                        if (isPlagued) {
+                            if (this.cellAge[row][col] > 5 && Math.random() < 0.4) {
                                 this.nextGrid[row][col] = 0;
                                 this.cellAge[row][col] = 0;
                                 nextPlagued[row][col] = 0;
@@ -620,21 +604,28 @@ class GameOfLife {
                         this.nextGrid[row][col] = 1;
                         this.cellAge[row][col] = 1;
 
-                        // Inherit traits from neighbors
-                        const plaguedNeighbors = this.countPlaguedNeighbors(row, col);
-                        const cleanerNeighbors = this.countCleanerNeighbors(row, col);
-
-                        // Cleaner takes priority
-                        if (this.enableCleaner && cleanerNeighbors > 0 && Math.random() < this.cleanerRate) {
-                            nextCleaner[row][col] = 1;
-                            nextPlagued[row][col] = 0;
+                        // Cells born in chaos zones are automatically plagued
+                        if (this.chaosMarkers[row][col] > 0) {
+                            nextPlagued[row][col] = 1;
+                            nextCleaner[row][col] = 0;
                             nextSuperbreed[row][col] = 0;
-                        } else if (this.enablePlague && plaguedNeighbors > 0) {
-                            // Plague spreads to new cells
-                            nextPlagued[row][col] = Math.random() < this.plagueRate ? 1 : 0;
-                        } else if (this.enableSuperbreed && superbreedNeighbors > 0) {
-                            // Superbreed trait can be inherited
-                            nextSuperbreed[row][col] = Math.random() < 0.3 ? 1 : 0;
+                        } else {
+                            // Inherit traits from neighbors
+                            const plaguedNeighbors = this.countPlaguedNeighbors(row, col);
+                            const cleanerNeighbors = this.countCleanerNeighbors(row, col);
+
+                            // Cleaner takes priority
+                            if (cleanerNeighbors > 0 && Math.random() < this.cleanerRate) {
+                                nextCleaner[row][col] = 1;
+                                nextPlagued[row][col] = 0;
+                                nextSuperbreed[row][col] = 0;
+                            } else if (plaguedNeighbors > 0) {
+                                // Plague spreads to new cells
+                                nextPlagued[row][col] = Math.random() < this.plagueRate ? 1 : 0;
+                            } else if (superbreedNeighbors > 0) {
+                                // Superbreed trait can be inherited
+                                nextSuperbreed[row][col] = Math.random() < 0.3 ? 1 : 0;
+                            }
                         }
                     } else {
                         this.nextGrid[row][col] = 0;
@@ -648,15 +639,13 @@ class GameOfLife {
         }
 
         // Spread plague to neighboring living cells
-        if (this.enablePlague) {
-            for (let row = 0; row < this.rows; row++) {
-                for (let col = 0; col < this.cols; col++) {
-                    if (this.nextGrid[row][col] === 1 && nextPlagued[row][col] === 0) {
-                        const plaguedNeighbors = this.countPlaguedNeighbors(row, col);
-                        if (plaguedNeighbors > 0 && Math.random() < this.plagueRate) {
-                            nextPlagued[row][col] = 1;
-                            nextSuperbreed[row][col] = 0; // Plague overrides superbreed
-                        }
+        for (let row = 0; row < this.rows; row++) {
+            for (let col = 0; col < this.cols; col++) {
+                if (this.nextGrid[row][col] === 1 && nextPlagued[row][col] === 0 && nextCleaner[row][col] === 0) {
+                    const plaguedNeighbors = this.countPlaguedNeighbors(row, col);
+                    if (plaguedNeighbors > 0 && Math.random() < this.plagueRate) {
+                        nextPlagued[row][col] = 1;
+                        nextSuperbreed[row][col] = 0; // Plague overrides superbreed
                     }
                 }
             }
@@ -804,26 +793,33 @@ class GameOfLife {
         this.ctx.fillStyle = '#000';
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
-        // Draw chaos markers (neon glow effects)
+        // Draw chaos markers (intense neon glow effects)
         for (let row = 0; row < this.rows; row++) {
             for (let col = 0; col < this.cols; col++) {
                 if (this.chaosMarkers[row][col] > 0) {
                     const x = col * this.cellSize + this.cellSize / 2;
                     const y = row * this.cellSize + this.cellSize / 2;
-                    const intensity = this.chaosMarkers[row][col] / 10;
+                    const intensity = Math.min(this.chaosMarkers[row][col] / this.catastropheImpact, 1);
 
-                    // Neon glow effect for chaos
-                    const gradient = this.ctx.createRadialGradient(x, y, 0, x, y, this.cellSize * 1.5);
-                    gradient.addColorStop(0, `rgba(255, 0, 255, ${intensity * 0.6})`);
-                    gradient.addColorStop(0.5, `rgba(0, 255, 255, ${intensity * 0.3})`);
+                    // Intense neon glow effect for chaos - highly visible
+                    const glowRadius = this.cellSize * 2;
+                    const gradient = this.ctx.createRadialGradient(x, y, 0, x, y, glowRadius);
+
+                    // Pulsating effect based on animation time
+                    const pulsePhase = (this.animationTime % 800) / 800;
+                    const pulse = Math.sin(pulsePhase * Math.PI * 2) * 0.2 + 0.8;
+
+                    gradient.addColorStop(0, `rgba(255, 0, 255, ${intensity * 0.8 * pulse})`);
+                    gradient.addColorStop(0.3, `rgba(255, 50, 200, ${intensity * 0.6 * pulse})`);
+                    gradient.addColorStop(0.6, `rgba(0, 255, 255, ${intensity * 0.4 * pulse})`);
                     gradient.addColorStop(1, 'rgba(255, 0, 255, 0)');
 
                     this.ctx.fillStyle = gradient;
                     this.ctx.fillRect(
-                        col * this.cellSize - this.cellSize,
-                        row * this.cellSize - this.cellSize,
-                        this.cellSize * 3,
-                        this.cellSize * 3
+                        col * this.cellSize - glowRadius,
+                        row * this.cellSize - glowRadius,
+                        glowRadius * 2,
+                        glowRadius * 2
                     );
                 }
             }
