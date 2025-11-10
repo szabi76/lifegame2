@@ -1148,65 +1148,96 @@ class GameOfLife {
     }
 
     getCellColor(row, col, age) {
-        // Cleaner cells are cyan/blue (highest priority for cleanliness)
-        if (this.cellCleaner[row][col] === 1) {
-            const cleanerColors = ['#48dbfb', '#0abde3', '#1e90ff', '#00bfff', '#87ceeb'];
-            if (this.showAging && age > 0) {
-                const maxAge = 20;
-                const normalizedAge = Math.min(age, maxAge) / maxAge;
-                const colorIndex = Math.min(Math.floor(normalizedAge * cleanerColors.length), cleanerColors.length - 1);
-                return cleanerColors[colorIndex];
-            }
-            return cleanerColors[0];
-        }
+        // New HSL-based aging system with hue dynamics
+        // Max lifecycle: 100 ticks, aging factor: 5 ticks
+        const maxAge = 100;
+        let normalizedAge = Math.min(age, maxAge) / maxAge; // 0.0 to 1.0
 
-        // Plague cells are red/dark red
-        if (this.cellPlagued[row][col] === 1) {
-            const plagueColors = ['#ff6b6b', '#ee5a6f', '#e74c3c', '#c0392b', '#a93226'];
-            if (this.showAging && age > 0) {
-                const maxAge = 20;
-                const normalizedAge = Math.min(age, maxAge) / maxAge;
-                const colorIndex = Math.min(Math.floor(normalizedAge * plagueColors.length), plagueColors.length - 1);
-                return plagueColors[colorIndex];
-            }
-            return plagueColors[0];
-        }
-
-        // Superbreed cells are gold/yellow
-        if (this.cellSuperbreed[row][col] === 1) {
-            const superbreedColors = ['#f9ca24', '#f0932b', '#ff9f43', '#ffa502', '#ff6348'];
-            if (this.showAging && age > 0) {
-                const maxAge = 20;
-                const normalizedAge = Math.min(age, maxAge) / maxAge;
-                const colorIndex = Math.min(Math.floor(normalizedAge * superbreedColors.length), superbreedColors.length - 1);
-                return superbreedColors[colorIndex];
-            }
-            return superbreedColors[0];
-        }
-
-        // Mutated cells are purple/violet (hybrid cells)
-        if (this.cellMutated[row][col] === 1) {
-            const mutatedColors = ['#a855f7', '#9333ea', '#7c3aed', '#6d28d9', '#5b21b6'];
-            if (this.showAging && age > 0) {
-                const maxAge = 20;
-                const normalizedAge = Math.min(age, maxAge) / maxAge;
-                const colorIndex = Math.min(Math.floor(normalizedAge * mutatedColors.length), mutatedColors.length - 1);
-                return mutatedColors[colorIndex];
-            }
-            return mutatedColors[0];
-        }
-
-        // Normal cells use theme colors with aging
         if (!this.showAging || age === 0) {
-            return this.themeColors[this.currentTheme][0];
+            normalizedAge = 0;
         }
 
-        const colors = this.themeColors[this.currentTheme];
-        const maxAge = 20;
-        const normalizedAge = Math.min(age, maxAge) / maxAge;
-        const colorIndex = Math.min(Math.floor(normalizedAge * colors.length), colors.length - 1);
+        // Cleaner cells: Cyan to Green spectrum (180° → 160°)
+        if (this.cellCleaner[row][col] === 1) {
+            const startHue = 180; // Bright cyan
+            const endHue = 160;   // Cyan-green
+            const hue = startHue - (startHue - endHue) * normalizedAge;
+            const saturation = 100 - (normalizedAge * 20); // 100% → 80%
+            const lightness = 60 - (normalizedAge * 15);   // 60% → 45%
+            return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+        }
 
-        return colors[colorIndex];
+        // Plague cells: Red to Red-Orange spectrum (0° → 25°)
+        if (this.cellPlagued[row][col] === 1) {
+            const startHue = 0;   // Pure red
+            const endHue = 25;    // Red-orange
+            const hue = startHue + (endHue - startHue) * normalizedAge;
+            const saturation = 100 - (normalizedAge * 15); // 100% → 85%
+            const lightness = 55 - (normalizedAge * 10);   // 55% → 45%
+            return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+        }
+
+        // Superbreed cells: Yellow to Gold spectrum (55° → 40°)
+        if (this.cellSuperbreed[row][col] === 1) {
+            const startHue = 55;  // Bright yellow
+            const endHue = 40;    // Gold-orange
+            const hue = startHue - (startHue - endHue) * normalizedAge;
+            const saturation = 100 - (normalizedAge * 20); // 100% → 80%
+            const lightness = 60 - (normalizedAge * 15);   // 60% → 45%
+            return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+        }
+
+        // Mutated cells: Purple to Magenta spectrum (280° → 300°)
+        if (this.cellMutated[row][col] === 1) {
+            const startHue = 280; // Purple
+            const endHue = 300;   // Magenta
+            const hue = startHue + (endHue - startHue) * normalizedAge;
+            const saturation = 100 - (normalizedAge * 15); // 100% → 85%
+            const lightness = 60 - (normalizedAge * 15);   // 60% → 45%
+            return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+        }
+
+        // Normal cells: Blue to Cyan spectrum (210° → 185°) for theme colors
+        // Use theme colors as base but apply aging with hue shift
+        if (this.currentTheme === 'neon') {
+            const startHue = 195; // Bright cyan
+            const endHue = 210;   // Blue-cyan
+            const hue = startHue + (endHue - startHue) * normalizedAge;
+            const saturation = 100 - (normalizedAge * 20);
+            const lightness = 60 - (normalizedAge * 15);
+            return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+        } else if (this.currentTheme === 'ocean') {
+            const startHue = 185;
+            const endHue = 210;
+            const hue = startHue + (endHue - startHue) * normalizedAge;
+            const saturation = 100 - (normalizedAge * 20);
+            const lightness = 60 - (normalizedAge * 15);
+            return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+        } else if (this.currentTheme === 'sunset') {
+            const startHue = 45;  // Gold
+            const endHue = 15;    // Orange-red
+            const hue = startHue - (startHue - endHue) * normalizedAge;
+            const saturation = 100 - (normalizedAge * 15);
+            const lightness = 65 - (normalizedAge * 20);
+            return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+        } else if (this.currentTheme === 'matrix') {
+            const startHue = 125; // Bright green
+            const endHue = 140;   // Green
+            const hue = startHue + (endHue - startHue) * normalizedAge;
+            const saturation = 100 - (normalizedAge * 25);
+            const lightness = 55 - (normalizedAge * 15);
+            return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+        } else if (this.currentTheme === 'fire') {
+            const startHue = 35;  // Orange
+            const endHue = 0;     // Red
+            const hue = startHue - (startHue - endHue) * normalizedAge;
+            const saturation = 100 - (normalizedAge * 10);
+            const lightness = 60 - (normalizedAge * 20);
+            return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+        }
+
+        // Fallback
+        return this.themeColors[this.currentTheme][0];
     }
 
     draw() {
@@ -1262,14 +1293,21 @@ class GameOfLife {
 
                     this.ctx.fillStyle = color;
 
-                    // Different shapes for different cell types
-                    if (this.cellCleaner[row][col] === 1) {
-                        // Pulsating circle for cleaner
+                    // Different shapes for different cell types with enhanced glow effects
+                    const isPlagued = this.cellPlagued[row][col] === 1;
+                    const isSuperbreed = this.cellSuperbreed[row][col] === 1;
+                    const isCleaner = this.cellCleaner[row][col] === 1;
+                    const isMutated = this.cellMutated[row][col] === 1;
+                    const isSpecial = isPlagued || isSuperbreed || isCleaner || isMutated;
+
+                    if (isCleaner) {
+                        // Pulsating circle for cleaner with strong glow
                         const pulsePhase = (this.animationTime % 1000) / 1000; // 0 to 1
                         const pulse = Math.sin(pulsePhase * Math.PI * 2) * 0.15 + 1; // 0.85 to 1.15
                         const radius = (this.cellSize / 2 - 1) * pulse;
 
-                        this.ctx.shadowBlur = 15 * pulse;
+                        // Enhanced glow effect for cleaner cells
+                        this.ctx.shadowBlur = 20 * pulse;
                         this.ctx.shadowColor = color;
 
                         this.ctx.beginPath();
@@ -1277,9 +1315,12 @@ class GameOfLife {
                         this.ctx.fill();
 
                         this.ctx.shadowBlur = 0;
-                    } else if (this.cellPlagued[row][col] === 1) {
-                        // Circle for plague
-                        this.ctx.shadowBlur = 8;
+                    } else if (isPlagued) {
+                        // Circle for plague with pulsing red glow
+                        const pulsePhase = (this.animationTime % 1500) / 1500;
+                        const pulse = Math.sin(pulsePhase * Math.PI * 2) * 0.3 + 1; // 0.7 to 1.3
+
+                        this.ctx.shadowBlur = 15 * pulse;
                         this.ctx.shadowColor = color;
 
                         this.ctx.beginPath();
@@ -1287,9 +1328,12 @@ class GameOfLife {
                         this.ctx.fill();
 
                         this.ctx.shadowBlur = 0;
-                    } else if (this.cellSuperbreed[row][col] === 1) {
-                        // Diamond/star for superbreed
-                        this.ctx.shadowBlur = 10;
+                    } else if (isSuperbreed) {
+                        // Diamond/star for superbreed with golden glow
+                        const pulsePhase = (this.animationTime % 1200) / 1200;
+                        const pulse = Math.sin(pulsePhase * Math.PI * 2) * 0.25 + 1; // 0.75 to 1.25
+
+                        this.ctx.shadowBlur = 18 * pulse;
                         this.ctx.shadowColor = color;
 
                         const size = this.cellSize / 2 - 1;
@@ -1302,9 +1346,12 @@ class GameOfLife {
                         this.ctx.fill();
 
                         this.ctx.shadowBlur = 0;
-                    } else if (this.cellMutated[row][col] === 1) {
-                        // Hexagon for mutated cells
-                        this.ctx.shadowBlur = 12;
+                    } else if (isMutated) {
+                        // Hexagon for mutated cells with purple glow
+                        const pulsePhase = (this.animationTime % 1800) / 1800;
+                        const pulse = Math.sin(pulsePhase * Math.PI * 2) * 0.3 + 1; // 0.7 to 1.3
+
+                        this.ctx.shadowBlur = 16 * pulse;
                         this.ctx.shadowColor = color;
 
                         const size = this.cellSize / 2 - 1;
@@ -1321,8 +1368,8 @@ class GameOfLife {
 
                         this.ctx.shadowBlur = 0;
                     } else {
-                        // Square for normal cells
-                        this.ctx.shadowBlur = 10;
+                        // Square for normal cells with subtle glow
+                        this.ctx.shadowBlur = 8;
                         this.ctx.shadowColor = color;
 
                         this.ctx.fillRect(x + 1, y + 1, this.cellSize - 2, this.cellSize - 2);

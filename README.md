@@ -18,39 +18,63 @@ An enhanced implementation of Conway's Game of Life featuring advanced cellular 
 
 ### Advanced Cell Types
 
+**Cell Lifecycle**: All cells age through a 100-generation lifecycle with visual hue-based aging dynamics.
+
 #### 🦠 Plague Cells (Red Circles)
-- **Visual**: Rendered as red circles with shadow glow
+- **Shape**: Circle with pulsing red glow (1.5 second pulse period)
+- **Color spectrum**: Red to Red-Orange (HSL: 0° → 25°)
+  - Young (0-20 gen): Bright red `hsl(0, 100%, 55%)`
+  - Aging (20-100 gen): Shifts to red-orange, decreases saturation/lightness
+  - Glow: 15px pulsating shadow blur (70-130% intensity)
 - **Resource consumption**: 0.02 per generation (2× normal rate)
 - **Infection spread**: 25% chance to infect neighboring cells each generation
 - **Mortality**: After age 5, 40% chance of death per generation
 - **Special behavior**: Cells born in catastrophe chaos zones are automatically plagued
 - **Trigger**: Click "🦠 Infect" button (affects 25% of living cells)
-- **Color gradient**: Ages from #ff6b6b (bright red) to #a93226 (dark red)
 
 #### ⭐ Superbreed Cells (Gold Diamonds)
-- **Visual**: Rendered as gold diamond shapes with shadow glow
+- **Shape**: Diamond/4-point star with golden glow (1.2 second pulse period)
+- **Color spectrum**: Yellow to Gold (HSL: 55° → 40°)
+  - Young (0-20 gen): Bright yellow `hsl(55, 100%, 60%)`
+  - Aging (20-100 gen): Shifts to gold-orange, decreases saturation/lightness
+  - Glow: 18px pulsating shadow blur (75-125% intensity)
 - **Enhanced survival**: Survive with 1-4 neighbors (vs normal 2-3)
 - **Enhanced reproduction**: Can birth new cells with only 2 superbreed neighbors
 - **Inheritance**: 30% chance to pass superbreed trait to offspring
 - **Trigger**: Click "⭐ Enhance" button (affects 20% of living cells)
-- **Color gradient**: Ages from #f9ca24 (bright gold) to #ff6348 (orange-red)
 
 #### ✨ Cleaner Cells (Cyan Pulsating Circles)
-- **Visual**: Rendered as cyan pulsating circles (pulse period: 1 second)
+- **Shape**: Pulsating circle with strong cyan glow (1.0 second pulse period)
+- **Color spectrum**: Cyan to Green (HSL: 180° → 160°)
+  - Young (0-20 gen): Bright cyan `hsl(180, 100%, 60%)`
+  - Aging (20-100 gen): Shifts to cyan-green, decreases saturation/lightness
+  - Glow: 20px pulsating shadow blur (85-115% intensity) - strongest glow
 - **Cleaning power**: Remove all special properties from neighboring cells
 - **Particle effects**: 5% chance per generation to emit cyan sparkle particles
 - **Inheritance**: 30% chance to pass cleaner trait to offspring
 - **Priority**: Cleaner trait overrides all other cell types
 - **Trigger**: Click "✨ Deploy" button (affects 15% of living cells)
-- **Color gradient**: Ages from #48dbfb (bright cyan) to #87ceeb (sky blue)
 
 #### 🧬 Mutated Cells (Purple Hexagons)
-- **Visual**: Rendered as purple hexagons with shadow glow
+- **Shape**: 6-point hexagon with purple glow (1.8 second pulse period)
+- **Color spectrum**: Purple to Magenta (HSL: 280° → 300°)
+  - Young (0-20 gen): Bright purple `hsl(280, 100%, 60%)`
+  - Aging (20-100 gen): Shifts to magenta, decreases saturation/lightness
+  - Glow: 16px pulsating shadow blur (70-130% intensity)
 - **Mutation rate**: 5% base rate (adjustable 0-20% via slider)
 - **Hybrid abilities**: Gain superbreed survival (1-4 neighbors) while keeping original specialty
 - **Stackable**: Can be mutated plague, mutated superbreed, etc.
 - **Removal**: Can only be removed by cleaner cells
-- **Color gradient**: Ages from #a855f7 (bright purple) to #5b21b6 (deep violet)
+
+#### ⬜ Normal Cells (Themed Squares)
+- **Shape**: Square with subtle glow (8px shadow blur)
+- **Color spectrum**: Theme-dependent HSL with hue aging
+  - **Neon**: Cyan to Blue (HSL: 195° → 210°)
+  - **Ocean**: Cyan to Blue (HSL: 185° → 210°)
+  - **Sunset**: Gold to Orange-Red (HSL: 45° → 15°)
+  - **Matrix**: Bright Green to Green (HSL: 125° → 140°)
+  - **Fire**: Orange to Red (HSL: 35° → 0°)
+- **Aging dynamics**: 100-generation lifecycle with continuous hue shift, saturation and lightness decrease
 
 ### Environmental Systems
 
