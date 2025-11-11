@@ -896,6 +896,83 @@ body {
 .control-group:nth-child(4) { animation-delay: 0.2s; }
 .control-group:nth-child(5) { animation-delay: 0.25s; }
 
+/* Cell Legend */
+.cell-legend {
+    margin-top: 12px;
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    padding: 4px 0;
+    font-size: 0.75em;
+    color: var(--text-secondary);
+    cursor: help;
+    transition: all 0.2s ease;
+}
+
+.legend-item:hover {
+    color: var(--text-primary);
+    transform: translateX(2px);
+}
+
+.legend-shape {
+    width: 12px;
+    height: 12px;
+    margin-right: 8px;
+    display: inline-block;
+    flex-shrink: 0;
+}
+
+.legend-shape.square {
+    border-radius: 2px;
+}
+
+.legend-shape.circle {
+    border-radius: 50%;
+}
+
+.legend-shape.diamond {
+    width: 10px;
+    height: 10px;
+    transform: rotate(45deg);
+    margin-right: 10px;
+}
+
+.legend-shape.hexagon {
+    width: 12px;
+    height: 12px;
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+}
+
+.legend-text {
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Cell Type Indicator (for buttons) */
+.cell-type-indicator {
+    vertical-align: middle;
+    animation: gentlePulse 2s ease-in-out infinite;
+}
+
+@keyframes gentlePulse {
+    0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.8;
+        transform: scale(1.1);
+    }
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     .sidebar {

@@ -113,12 +113,21 @@
                     </button>
                     <div id="advanced" class="section-content">
                         <div class="button-group-inline">
-                            <button id="triggerPlague" class="btn-compact btn-plague">🦠 Infect</button>
-                            <button id="triggerSuperbreed" class="btn-compact btn-super">⭐ Enhance</button>
+                            <button id="triggerPlague" class="btn-compact btn-plague" title="Plague cells: Red circles with pulsing glow">
+                                <span class="cell-type-indicator" style="background: hsl(0, 100%, 55%); border-radius: 50%; width: 12px; height: 12px; display: inline-block; box-shadow: 0 0 6px hsl(0, 100%, 55%); margin-right: 4px;"></span>
+                                🦠 Infect
+                            </button>
+                            <button id="triggerSuperbreed" class="btn-compact btn-super" title="Superbreed cells: Yellow diamonds with golden glow">
+                                <span class="cell-type-indicator" style="background: hsl(55, 100%, 60%); width: 10px; height: 10px; display: inline-block; transform: rotate(45deg); box-shadow: 0 0 6px hsl(55, 100%, 60%); margin-right: 4px;"></span>
+                                ⭐ Enhance
+                            </button>
                         </div>
                         <div class="button-group-inline">
-                            <button id="triggerCleaner" class="btn-compact btn-cleaner">✨ Deploy</button>
-                            <button id="triggerChaos" class="btn-compact btn-chaos">💥 Destroy</button>
+                            <button id="triggerCleaner" class="btn-compact btn-cleaner" title="Cleaner cells: Cyan pulsating circles">
+                                <span class="cell-type-indicator" style="background: hsl(180, 100%, 60%); border-radius: 50%; width: 12px; height: 12px; display: inline-block; box-shadow: 0 0 8px hsl(180, 100%, 60%); margin-right: 4px;"></span>
+                                ✨ Deploy
+                            </button>
+                            <button id="triggerChaos" class="btn-compact btn-chaos" title="Creates catastrophe with explosion particles">💥 Destroy</button>
                         </div>
                         <div class="slider-group">
                             <label>Plague <span id="plagueRateValue">25</span>%</label>
@@ -168,6 +177,28 @@
                     </button>
                     <div id="barchart" class="section-content">
                         <canvas id="barChart" width="240" height="140"></canvas>
+                        <div class="cell-legend">
+                            <div class="legend-item" title="Normal cells age from bright to dark through 100 generations">
+                                <span class="legend-shape square" style="background: hsl(195, 100%, 60%); box-shadow: 0 0 4px hsl(195, 100%, 60%);"></span>
+                                <span class="legend-text">Normal (Square)</span>
+                            </div>
+                            <div class="legend-item" title="Red circles - Age: Red to Red-Orange">
+                                <span class="legend-shape circle" style="background: hsl(0, 100%, 55%); box-shadow: 0 0 6px hsl(0, 100%, 55%);"></span>
+                                <span class="legend-text">Plague (Circle)</span>
+                            </div>
+                            <div class="legend-item" title="Gold diamonds - Age: Yellow to Gold">
+                                <span class="legend-shape diamond" style="background: hsl(55, 100%, 60%); box-shadow: 0 0 6px hsl(55, 100%, 60%);"></span>
+                                <span class="legend-text">Superbreed (Diamond)</span>
+                            </div>
+                            <div class="legend-item" title="Cyan pulsating circles - Age: Cyan to Green">
+                                <span class="legend-shape circle" style="background: hsl(180, 100%, 60%); box-shadow: 0 0 8px hsl(180, 100%, 60%);"></span>
+                                <span class="legend-text">Cleaner (Pulsing)</span>
+                            </div>
+                            <div class="legend-item" title="Purple hexagons - Age: Purple to Magenta">
+                                <span class="legend-shape hexagon" style="background: hsl(280, 100%, 60%); box-shadow: 0 0 6px hsl(280, 100%, 60%);"></span>
+                                <span class="legend-text">Mutated (Hexagon)</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
