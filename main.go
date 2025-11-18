@@ -10,8 +10,8 @@ import (
 )
 
 const (
-	screenWidth   = 1920
-	screenHeight  = 1080
+	screenWidth   = 1280 // Reduced from 1920 for better compatibility
+	screenHeight  = 720  // Reduced from 1080 for better compatibility
 	cellSize      = 8
 	cols          = screenWidth / cellSize
 	rows          = screenHeight / cellSize
@@ -482,15 +482,42 @@ func (g *Game) Update() {
 }
 
 func main() {
+	// Seed random number generator
 	rand.Seed(time.Now().UnixNano())
 
+	// Print startup message
+	fmt.Println("Advanced Game of Life - Starting...")
+	fmt.Println("Initializing raylib...")
+
+	// Configure window flags
 	rl.SetConfigFlags(rl.FlagVsyncHint | rl.FlagMsaa4xHint)
+
+	// Try to initialize window
+	fmt.Printf("Creating window: %dx%d\n", screenWidth, screenHeight)
 	rl.InitWindow(screenWidth, screenHeight, "Advanced Game of Life - Go/Raylib")
+
+	// Check if window was created
+	if !rl.IsWindowReady() {
+		fmt.Println("ERROR: Failed to create window!")
+		fmt.Println("Possible causes:")
+		fmt.Println("  - Graphics drivers need updating")
+		fmt.Println("  - OpenGL 3.3+ not supported")
+		fmt.Println("  - Display resolution too low")
+		fmt.Println("\nPress Enter to exit...")
+		fmt.Scanln()
+		return
+	}
+
+	fmt.Println("Window created successfully!")
 	rl.SetTargetFPS(targetFPS)
 
+	// Create game
+	fmt.Println("Initializing game...")
 	game := NewGame()
 	game.Randomize()
+	fmt.Println("Game ready! Press SPACE to start.")
 
+	// Main game loop
 	for !rl.WindowShouldClose() {
 		game.Update()
 
@@ -500,5 +527,7 @@ func main() {
 		rl.EndDrawing()
 	}
 
+	fmt.Println("Closing game...")
 	rl.CloseWindow()
+	fmt.Println("Game closed successfully!")
 }
