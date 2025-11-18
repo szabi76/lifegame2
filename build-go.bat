@@ -47,7 +47,14 @@ REM Build the executable
 echo Building executable...
 echo.
 
+REM Build with optimizations for Windows
 go build -ldflags="-s -w -H windowsgui" -o "Advanced-Game-of-Life.exe" main.go
+
+REM If above fails, try without -H windowsgui flag
+if %ERRORLEVEL% NEQ 0 (
+    echo Retrying without windowsgui flag...
+    go build -ldflags="-s -w" -o "Advanced-Game-of-Life.exe" main.go
+)
 
 if %ERRORLEVEL% NEQ 0 (
     echo.
